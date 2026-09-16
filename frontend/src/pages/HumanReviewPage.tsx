@@ -1,10 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { mockApi } from '../services/mockApi';
+import { ApiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { LandRecord } from '../types';
-import { StatusBadge, ConfidenceBadge } from '../components/ui/Badge';
+import type {
+  ReviewRouting,
+  FlagExplanation,
+  CorrectionFeedback,
+  CorrectionHistoryEntry,
+} from '../types/intelligence';
+import { StatusBadge } from '../components/ui/Badge';
 import { LoadingState } from '../components/ui/FeedbackStates';
+import {
+  ReviewRoutingPanel,
+  WhyFlaggedDrawer,
+  CorrectionFeedbackForm,
+  CorrectionHistoryPanel,
+} from '../components/ui/IntelligenceCards';
 import { 
   CheckCircle2, 
   AlertTriangle, 
@@ -19,8 +32,10 @@ import {
   FileText, 
   ShieldCheck, 
   ArrowLeft,
-  Sparkles
+  HelpCircle,
+  History
 } from 'lucide-react';
+import { PageHeader } from '../components/ui/PageHeader';
 
 export const HumanReviewPage: React.FC = () => {
   const { recordId } = useParams<{ recordId: string }>();
@@ -36,6 +51,14 @@ export const HumanReviewPage: React.FC = () => {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+
+  // Round-2 intelligence state
+  const [reviewRouting, setReviewRouting] = useState<ReviewRouting | undefined>();
+  const [flagExplanations] = useState<FlagExplanation[]>([]); // populated by backend
+  const [showWhyFlagged, setShowWhyFlagged] = useState(false);
+  const [correctionFeedbacks, setCorrectionFeedbacks] = useState<Record<string, Partial<CorrectionFeedback>>>({});
+  const [correctionHistory, setCorrectionHistory] = useState<CorrectionHistoryEntry[]>([]);
+  const [showFeedbackFor, setShowFeedbackFor] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRecord = async () => {
@@ -54,6 +77,14 @@ export const HumanReviewPage: React.FC = () => {
     };
     fetchRecord();
   }, [recordId]);
+
+  // Non-blocking load of intelligence data
+  useEffect(() => {
+    if (record) {
+      ApiService.getReviewRouting(record.id).then(r => setReviewRouting(r ?? undefined));
+      ApiService.getCorrectionHistory(record.id).then(h => setCorrectionHistory(h));
+    }
+  }, [record?.id]);
 
   const handleFieldChange = (fieldKey: string, val: string) => {
     setFormData(prev => ({
@@ -107,64 +138,52 @@ export const HumanReviewPage: React.FC = () => {
   return (
     <div className="space-y-4 max-w-7xl mx-auto">
       {/* Top Header & Actions */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="flex items-center space-x-3">
-          <Link
-            to="/verification"
-            className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition"
-            title="Back to queue"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
-          <div>
-            <div className="flex items-center space-x-2">
-              <h1 className="text-base font-black text-slate-900">
-                Split-Screen Verification: {record.displayId}
-              </h1>
-              <StatusBadge status={record.status} size="sm" />
-            </div>
-            <p className="text-xs text-slate-500">
-              {record.village} Village • {record.tehsil} Tehsil • Survey No. {record.surveyNumber}
-            </p>
+      <PageHeader
+        category="Verification Workspace"
+        breadcrumbs={[
+          { label: 'Queue', href: '/verification' },
+          { label: record.displayId },
+        ]}
+        title={`Verification: ${record.displayId}`}
+        description={`${record.village} · ${record.tehsil} · Survey No. ${record.surveyNumber}`}
+        badge={<StatusBadge status={record.status} size="sm" />}
+        actions={
+          <div className="flex items-center space-x-2">
+            {saveSuccess && (
+              <span className="text-xs text-[#166534] font-semibold flex items-center mr-2 animate-fadeIn">
+                <CheckCircle2 className="w-4 h-4 mr-1 text-[#166534]" /> Saved
+              </span>
+            )}
+
+            <button
+              type="button"
+              onClick={handleSave}
+              className="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded text-xs font-semibold flex items-center space-x-1.5 transition cursor-pointer"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>Save</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowRejectModal(true)}
+              className="px-3 py-1.5 bg-white border border-[#CBD5E1] hover:bg-slate-50 text-[#334155] rounded text-xs font-semibold flex items-center space-x-1 transition cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span>Reject</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowApproveConfirm(true)}
+              className="px-3.5 py-1.5 bg-[#166534] hover:bg-[#14532D] text-white rounded text-xs font-semibold flex items-center space-x-1.5 transition cursor-pointer"
+            >
+              <Check className="w-4 h-4" />
+              <span>Approve record</span>
+            </button>
           </div>
-        </div>
-
-        {/* Global Actions */}
-        <div className="flex items-center space-x-2">
-          {saveSuccess && (
-            <span className="text-xs text-emerald-700 font-semibold flex items-center mr-2 animate-fadeIn">
-              <CheckCircle2 className="w-4 h-4 mr-1 text-emerald-600" /> Corrections Saved
-            </span>
-          )}
-
-          <button
-            type="button"
-            onClick={handleSave}
-            className="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-bold shadow-2xs flex items-center space-x-1.5 transition cursor-pointer"
-          >
-            <Save className="w-3.5 h-3.5" />
-            <span>Save Edits</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowRejectModal(true)}
-            className="px-3 py-1.5 bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-bold shadow-2xs flex items-center space-x-1 transition cursor-pointer"
-          >
-            <X className="w-3.5 h-3.5" />
-            <span>Reject</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowApproveConfirm(true)}
-            className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm flex items-center space-x-1.5 transition cursor-pointer"
-          >
-            <Check className="w-4 h-4" />
-            <span>Approve Record</span>
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Main Split-Screen Workspace (Desktop 2-Col Grid) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -173,7 +192,7 @@ export const HumanReviewPage: React.FC = () => {
           {/* Document Toolbar */}
           <div className="p-3 bg-slate-100 border-b border-slate-200 flex items-center justify-between text-xs text-slate-700">
             <div className="flex items-center space-x-2 font-semibold">
-              <FileText className="w-4 h-4 text-blue-800" />
+              <FileText className="w-4 h-4 text-slate-500" />
               <span>7_12_Extract_Haveli_Survey_124_3.pdf</span>
             </div>
 
@@ -182,7 +201,7 @@ export const HumanReviewPage: React.FC = () => {
               <div className="flex items-center space-x-1 bg-white border border-slate-300 rounded px-1.5 py-0.5">
                 <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  className="p-1 hover:text-blue-600"
+                  className="p-1 hover:text-slate-700"
                   title="Previous Page"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" />
@@ -190,7 +209,7 @@ export const HumanReviewPage: React.FC = () => {
                 <span className="text-[11px] font-medium px-1">Page {currentPage} of 3</span>
                 <button
                   onClick={() => setCurrentPage(p => Math.min(3, p + 1))}
-                  className="p-1 hover:text-blue-600"
+                  className="p-1 hover:text-slate-700"
                   title="Next Page"
                 >
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -200,7 +219,7 @@ export const HumanReviewPage: React.FC = () => {
               <div className="flex items-center space-x-1 bg-white border border-slate-300 rounded px-1.5 py-0.5">
                 <button
                   onClick={() => setZoomLevel(z => Math.max(70, z - 10))}
-                  className="p-1 hover:text-blue-600"
+                  className="p-1 hover:text-slate-700"
                   title="Zoom Out"
                 >
                   <ZoomOut className="w-3.5 h-3.5" />
@@ -208,7 +227,7 @@ export const HumanReviewPage: React.FC = () => {
                 <span className="text-[11px] font-medium px-1">{zoomLevel}%</span>
                 <button
                   onClick={() => setZoomLevel(z => Math.min(150, z + 10))}
-                  className="p-1 hover:text-blue-600"
+                  className="p-1 hover:text-slate-700"
                   title="Zoom In"
                 >
                   <ZoomIn className="w-3.5 h-3.5" />
@@ -299,22 +318,26 @@ export const HumanReviewPage: React.FC = () => {
               </div>
 
               {record.validationIssues.map(issue => (
-                <div key={issue.id} className="text-xs text-amber-800 bg-white/80 p-2.5 rounded-lg border border-amber-200">
+                <div key={issue.id} className="text-xs text-slate-700 bg-white/80 p-2.5 rounded-lg border border-amber-200">
                   <div className="font-bold flex items-center justify-between">
-                    <span>{issue.ruleCode}</span>
-                    <span className="text-[10px] uppercase font-bold text-amber-700 bg-amber-100 px-1.5 rounded">{issue.severity}</span>
+                    <span className="font-mono text-[11px] text-slate-600">{issue.ruleCode}</span>
+                    <span className="text-[10px] text-slate-500">
+                      <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle ${
+                        issue.severity === 'error' || issue.severity === 'critical' ? 'bg-[#DC2626]' : 'bg-[#D97706]'
+                      }`} />
+                      {issue.severity.charAt(0) + issue.severity.slice(1).toLowerCase()}
+                    </span>
                   </div>
-                  <p className="mt-1 text-[11px] leading-relaxed">{issue.message}</p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-slate-600">{issue.message}</p>
 
                   {issue.expectedValue && (
                     <div className="mt-2 flex items-center justify-between pt-1 border-t border-amber-200 text-[11px]">
                       <span>Reference expected: <strong className="text-slate-800">{issue.expectedValue}</strong></span>
                       <button
-                        type="button"
                         onClick={handleQuickFixArea}
-                        className="inline-flex items-center text-xs font-bold text-blue-700 hover:text-blue-900 underline"
+                        className="inline-flex items-center text-xs font-semibold text-[#166534] hover:text-[#14532D] underline"
                       >
-                        <Sparkles className="w-3 h-3 mr-1 text-amber-600" /> Accept 2.54 ha
+                        <Check className="w-3 h-3 mr-1" /> Accept 2.54 ha
                       </button>
                     </div>
                   )}
@@ -322,20 +345,17 @@ export const HumanReviewPage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 flex items-center space-x-2 text-emerald-800 text-xs font-semibold">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>All validation rules passed. Record verified by officer.</span>
+            <div className="bg-white border border-[#E2E8F0] rounded-xl p-3.5 flex items-center space-x-2 text-xs font-semibold">
+              <span className="inline-block w-2 h-2 rounded-full bg-[#15803D] shrink-0" />
+              <span className="text-[#0F172A]">All validation rules passed. Record verified by officer.</span>
             </div>
           )}
 
           {/* Extracted Fields Form */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-5 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">Extracted Candidate Fields</h3>
-                <p className="text-[11px] text-slate-500">Edit fields directly to apply verified corrections.</p>
-              </div>
-              <ConfidenceBadge confidence={record.overallConfidence} />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">Extracted Fields</h3>
+              <span className="text-xs text-slate-500 font-medium tabular-nums">{record.overallConfidence}% confidence</span>
             </div>
 
             <div className="space-y-3.5 text-xs">
@@ -350,10 +370,10 @@ export const HumanReviewPage: React.FC = () => {
                     type="text"
                     value={formData.ownerName ?? ''}
                     onChange={e => handleFieldChange('ownerName', e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs font-semibold border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-1.5 text-xs font-semibold border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#166534] focus:border-[#166534]"
                   />
                   <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                    <ConfidenceBadge confidence={96} showLabel={false} />
+                    <span className="text-[10px] text-[#15803D] font-semibold tabular-nums">96%</span>
                   </div>
                 </div>
               </div>
@@ -370,12 +390,12 @@ export const HumanReviewPage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-emerald-800 mb-1">Gat No. (गट)</label>
+                  <label className="block font-bold text-slate-700 mb-1">Gat No. (गट)</label>
                   <input
                     type="text"
                     value={formData.gatNumber ?? formData.surveyNumber?.toString().split('/')[0] ?? '124'}
                     onChange={e => handleFieldChange('gatNumber', e.target.value)}
-                    className="w-full px-2.5 py-1.5 text-xs font-semibold border border-emerald-300 bg-emerald-50/40 rounded-lg"
+                    className="w-full px-2.5 py-1.5 text-xs font-semibold border border-slate-300 rounded-lg"
                   />
                 </div>
                 <div>
@@ -399,13 +419,17 @@ export const HumanReviewPage: React.FC = () => {
               </div>
 
               {/* Plot Area - The Primary Highlighted Field */}
-              <div className="p-3 bg-amber-50/70 border border-amber-300 rounded-lg space-y-1.5">
+              <div className="p-3 bg-white border border-[#D97706] rounded-lg space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="font-bold text-amber-900 flex items-center">
-                    <AlertTriangle className="w-3.5 h-3.5 mr-1 text-amber-600" />
-                    Plot Area (Hectares)
+                  <label className="font-bold text-slate-800 flex items-center">
+                    <AlertTriangle className="w-3.5 h-3.5 mr-1 text-[#D97706]" />
+                    Plot area (hectares)
                   </label>
-                  <ConfidenceBadge confidence={Number(formData.plotArea) === 2.54 ? 100 : 58} />
+                  <span className={`text-[10px] font-semibold tabular-nums ${
+                    Number(formData.plotArea) === 2.54 ? 'text-[#15803D]' : 'text-[#D97706]'
+                  }`}>
+                    {Number(formData.plotArea) === 2.54 ? '100%' : '58%'} confidence
+                  </span>
                 </div>
                 <div className="flex space-x-2">
                   <input
@@ -413,24 +437,24 @@ export const HumanReviewPage: React.FC = () => {
                     step="0.01"
                     value={formData.plotArea ?? ''}
                     onChange={e => handleFieldChange('plotArea', e.target.value)}
-                    className={`w-full px-3 py-1.5 text-xs font-black border rounded-lg focus:ring-2 ${
+                    className={`w-full px-3 py-1.5 text-xs font-black border rounded-lg focus:ring-2 focus:ring-[#166534] ${
                       Number(formData.plotArea) === 2.54 
-                        ? 'border-emerald-500 bg-emerald-50 text-emerald-900' 
-                        : 'border-amber-400 bg-white text-amber-950'
+                        ? 'border-[#166534] text-[#0F172A]' 
+                        : 'border-[#D97706] text-[#0F172A]'
                     }`}
                   />
                   <button
                     type="button"
                     onClick={handleQuickFixArea}
-                    className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded text-[11px] shrink-0"
+                    className="px-2.5 py-1 bg-[#166534] hover:bg-[#14532D] text-white font-bold rounded text-[11px] shrink-0"
                     title="Correct to reference 2.54"
                   >
                     Fix: 2.54
                   </button>
                 </div>
-                <p className="text-[10px] text-amber-800">
+                <p className="text-[10px] text-slate-500">
                   {Number(formData.plotArea) === 2.54 
-                    ? '✓ Corrected to 2.54 ha matching revenue ledger.' 
+                    ? '✓ Corrected to 2.54 ha — matches revenue ledger.' 
                     : '⚠ Faded numeral in source image was parsed as 2.45.'}
                 </p>
               </div>
@@ -492,44 +516,84 @@ export const HumanReviewPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Round-2 Intelligence: Review Routing + Correction History Sidebar */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Review Routing */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Review Routing</span>
+            <button
+              onClick={() => setShowWhyFlagged(true)}
+              className="inline-flex items-center space-x-1 px-2.5 py-1 bg-white border border-[#CBD5E1] hover:bg-slate-50 text-[#334155] rounded text-xs font-semibold transition"
+            >
+              <HelpCircle className="w-3.5 h-3.5" />
+              <span>Why flagged?</span>
+            </button>
+          </div>
+          <ReviewRoutingPanel routing={reviewRouting} />
+        </div>
+
+        {/* Correction History */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Correction History</span>
+            <History className="w-4 h-4 text-slate-400" />
+          </div>
+          <CorrectionHistoryPanel entries={correctionHistory} />
+        </div>
+      </div>
+
+      {/* Why Flagged Drawer */}
+      <WhyFlaggedDrawer
+        open={showWhyFlagged}
+        onClose={() => setShowWhyFlagged(false)}
+        explanations={flagExplanations}
+      />
+
       {/* Approval Confirmation Dialog */}
       {showApproveConfirm && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2.5 bg-emerald-100 text-emerald-700 rounded-full">
-                <CheckCircle2 className="w-6 h-6" />
-              </div>
+          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-xl space-y-4">
+            <div className="flex items-center space-x-2.5">
+              <CheckCircle2 className="w-5 h-5 text-[#166534] shrink-0" />
               <div>
                 <h3 className="text-base font-bold text-slate-900">Approve Digital Land Record</h3>
-                <p className="text-xs text-slate-500">Official verification action</p>
               </div>
             </div>
 
             <p className="text-xs text-slate-600 leading-relaxed">
-              This will officially certify the digital extraction for <strong className="text-slate-900">{record.ownerName}</strong> (Survey No. {formData.surveyNumber}, Area: {formData.plotArea} ha) and associate it with the GIS parcel map and immutable audit history.
+              This will certify the extraction for {record.ownerName} (Survey No. {formData.surveyNumber}, {formData.plotArea} ha) and link it to the parcel map and audit trail.
             </p>
 
-            <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1 text-slate-700">
-              <div><strong>Approving Officer:</strong> {currentUser?.name}</div>
-              <div><strong>Tehsil / District:</strong> Haveli / Pune</div>
-              <div><strong>Status After Approval:</strong> APPROVED</div>
+            <div className="p-3 bg-white border border-[#E2E8F0] rounded-lg text-xs space-y-1.5 text-slate-700">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 font-medium">Approving officer</span>
+                <span className="font-semibold text-slate-900">{currentUser?.name}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 font-medium">Tehsil / District</span>
+                <span className="font-semibold text-slate-900">Haveli / Pune</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 font-medium">Status after approval</span>
+                <span className="font-semibold text-[#166534]">Approved</span>
+              </div>
             </div>
 
-            <div className="flex justify-end space-x-3 pt-2">
+            <div className="flex justify-end space-x-2.5 pt-2">
               <button
                 type="button"
                 onClick={() => setShowApproveConfirm(false)}
-                className="px-4 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                className="px-4 py-2 bg-white border border-[#CBD5E1] hover:bg-slate-50 text-[#334155] rounded-[6px] text-xs font-semibold cursor-pointer transition"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleApprove}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm"
+                className="px-4 py-2 bg-[#166534] hover:bg-[#14532D] text-white rounded-[6px] text-xs font-semibold cursor-pointer transition"
               >
-                Confirm & Approve Record
+                Confirm approval
               </button>
             </div>
           </div>
@@ -539,40 +603,37 @@ export const HumanReviewPage: React.FC = () => {
       {/* Rejection Modal */}
       {showRejectModal && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2.5 bg-rose-100 text-rose-700 rounded-full">
-                <X className="w-6 h-6" />
-              </div>
+          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-xl space-y-4">
+            <div className="flex items-center space-x-2.5">
+              <X className="w-5 h-5 text-[#DC2626] shrink-0" />
               <div>
                 <h3 className="text-base font-bold text-slate-900">Reject Record</h3>
-                <p className="text-xs text-slate-500">Provide rejection justification</p>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Reason for Rejection</label>
+              <label className="block text-xs font-medium text-slate-700 mb-1">Reason</label>
               <textarea
                 value={rejectReason}
                 onChange={e => setRejectReason(e.target.value)}
-                placeholder="e.g. Document image quality too degraded to verify survey number."
+                placeholder="e.g. Image quality too degraded to verify survey number."
                 rows={3}
-                className="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500"
+                className="w-full text-xs p-2.5 border border-[#CBD5E1] rounded-[6px] focus:ring-1 focus:ring-[#166534] focus:border-[#166534] focus:outline-hidden text-slate-900"
               />
             </div>
 
-            <div className="flex justify-end space-x-3 pt-2">
+            <div className="flex justify-end space-x-2.5 pt-2">
               <button
                 type="button"
                 onClick={() => setShowRejectModal(false)}
-                className="px-4 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                className="px-4 py-2 bg-white border border-[#CBD5E1] hover:bg-slate-50 text-[#334155] rounded-[6px] text-xs font-semibold cursor-pointer transition"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleReject}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow-sm"
+                className="px-4 py-2 bg-[#DC2626] hover:bg-[#B91C1C] text-white rounded-[6px] text-xs font-semibold cursor-pointer transition"
               >
                 Reject Record
               </button>

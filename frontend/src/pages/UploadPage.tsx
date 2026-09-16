@@ -7,15 +7,12 @@ import {
   UploadCloud, 
   FileText, 
   CheckCircle2, 
-  AlertCircle, 
   ArrowRight, 
-  Sparkles, 
   Languages,
   Check,
   RotateCcw,
-  ExternalLink,
-  ShieldCheck
 } from 'lucide-react';
+import { PageHeader } from '../components/ui/PageHeader';
 
 export const UploadPage: React.FC = () => {
   const navigate = useNavigate();
@@ -95,76 +92,68 @@ export const UploadPage: React.FC = () => {
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-12">
       {/* Page Header */}
-      <div>
-        <h1 className="text-xl font-black text-slate-900 flex items-center space-x-2">
-          <UploadCloud className="w-5 h-5 text-emerald-800" />
-          <span>{isCitizen ? t('Submit Document for Digitization') : t('Upload Government Land Record')}</span>
-        </h1>
-        <p className="text-xs text-slate-500 mt-1">
-          {isCitizen 
-            ? t('Submit your scanned land documents, 7/12 extracts, or registered deeds for official verification and record synchronization.')
-            : t('Upload scanned legacy revenue registers, PDFs, or photos for automated OCR, schema extraction, and validation.')
-          }
-        </p>
-      </div>
+      <PageHeader
+        category={isCitizen ? undefined : 'Documents'}
+        title={isCitizen ? 'Submit Document' : 'Upload Land Record'}
+      />
 
       {/* Standard Revenue Document Templates */}
-      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4">
-        <div className="flex items-center space-x-2 text-xs font-bold text-emerald-900 mb-2">
-          <Sparkles className="w-4 h-4 text-emerald-700" />
-          <span>Standard Revenue Document Templates (Quick Test Ingestion)</span>
+      <div className="bg-white border border-[#E2E8F0] rounded-lg p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <div className="flex items-center space-x-2 text-xs font-semibold text-slate-700 mb-1.5">
+          <FileText className="w-4 h-4 text-[#475569]" />
+          <span>Document templates</span>
         </div>
-        <p className="text-[11px] text-slate-600 mb-3">
-          Select a realistic pre-configured document from state revenue archives:
+        <p className="text-[11px] text-slate-500 mb-3">
+          Load a sample document.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           <button
             type="button"
             onClick={() => handleTemplateSelect('7_12_Extract_Haveli_Survey_124_3.pdf', 'Marathi', 'Land Record', '2.4 MB', 3)}
-            className="text-left p-2.5 bg-white border border-emerald-200 hover:border-emerald-500 rounded-lg text-xs transition shadow-2xs cursor-pointer"
+            className="text-left p-3 bg-white hover:bg-slate-50 border border-[#E2E8F0] rounded-lg text-xs transition cursor-pointer"
           >
-            <div className="font-bold text-slate-900 truncate">7/12 Extract (Haveli)</div>
-            <div className="text-[10px] text-slate-500">Marathi • 3 Pages • Land Record</div>
+            <div className="font-bold text-[#0F172A] truncate">7/12 Extract (Haveli)</div>
+            <div className="text-[10px] text-slate-500 mt-1">Marathi · 3 Pages · Land Record</div>
           </button>
 
           <button
             type="button"
             onClick={() => handleTemplateSelect('Sale_Deed_Pune_Plot_45.pdf', 'English', 'Ownership Record', '4.8 MB', 8)}
-            className="text-left p-2.5 bg-white border border-emerald-200 hover:border-emerald-500 rounded-lg text-xs transition shadow-2xs cursor-pointer"
+            className="text-left p-3 bg-white hover:bg-slate-50 border border-[#E2E8F0] rounded-lg text-xs transition cursor-pointer"
           >
-            <div className="font-bold text-slate-900 truncate">Registered Sale Deed</div>
-            <div className="text-[10px] text-slate-500">English • 8 Pages • Ownership</div>
+            <div className="font-bold text-[#0F172A] truncate">Registered Sale Deed</div>
+            <div className="text-[10px] text-slate-500 mt-1">English · 8 Pages · Ownership</div>
           </button>
 
           <button
             type="button"
             onClick={() => handleTemplateSelect('Mutation_Entry_Baramati_94.jpg', 'Marathi', 'Mutation Record', '3.1 MB', 1)}
-            className="text-left p-2.5 bg-white border border-emerald-200 hover:border-emerald-500 rounded-lg text-xs transition shadow-2xs cursor-pointer"
+            className="text-left p-3 bg-white hover:bg-slate-50 border border-[#E2E8F0] rounded-lg text-xs transition cursor-pointer"
           >
-            <div className="font-bold text-slate-900 truncate">Mutation Register (Handwritten)</div>
-            <div className="text-[10px] text-slate-500">Marathi • 1 Image • Ferfar</div>
+            <div className="font-bold text-[#0F172A] truncate">Mutation Register (Ferfar)</div>
+            <div className="text-[10px] text-slate-500 mt-1">Marathi · 1 Image · Ferfar</div>
           </button>
         </div>
       </div>
 
       {/* Upload Form */}
-      <form onSubmit={handleSubmit} className="bg-white border border-slate-200 rounded-xl p-6 space-y-6 shadow-xs">
+      <form onSubmit={handleSubmit} className="bg-white border border-[#E2E8F0] rounded-lg p-6 space-y-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         {/* Drag & Drop Area */}
         <div>
           <label className="block text-xs font-bold text-slate-700 mb-2">
-            Select Document File
+            Document file
           </label>
-          <div className="border-2 border-dashed border-emerald-200 hover:border-emerald-500 rounded-xl p-8 text-center transition bg-slate-50/50 hover:bg-emerald-50/20 relative">
+          <div className="border-2 border-dashed border-[#CBD5E1] hover:border-[#166534] rounded-lg p-8 text-center transition bg-slate-50 hover:bg-[#166534]/[0.02] relative">
             <input
               type="file"
               accept=".pdf,.png,.jpg,.jpeg,.tiff"
               onChange={handleFileChange}
               className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
             />
-            <UploadCloud className="w-10 h-10 text-emerald-700 mx-auto mb-2" />
+            <UploadCloud className="w-10 h-10 text-[#166534] mx-auto mb-2" />
             <div className="text-sm font-bold text-slate-800">
-              Drag & drop document here, or <span className="text-emerald-700 underline">browse files</span>
+              Drag & drop document here, or <span className="text-[#166534] underline hover:text-[#14532D]">browse files</span>
             </div>
             <p className="text-[11px] text-slate-400 mt-1">
               Supports multi-page PDF, High-Res PNG/JPEG, TIFF up to 25 MB
@@ -176,13 +165,13 @@ export const UploadPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center space-x-1">
-              <Languages className="w-3.5 h-3.5 text-slate-500" />
+              <Languages className="w-4 h-4 text-[#475569]" />
               <span>Document Language</span>
             </label>
             <select
               value={language}
               onChange={e => setLanguage(e.target.value as any)}
-              className="w-full text-xs border border-slate-300 rounded-lg p-2 bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+              className="w-full text-xs border border-slate-300 rounded-lg p-2 bg-white focus:outline-hidden focus:ring-2 focus:ring-[#15803D] focus:border-[#15803D]"
             >
               <option value="Marathi">Marathi (मराठी)</option>
               <option value="Hindi">Hindi (हिन्दी)</option>
@@ -198,7 +187,7 @@ export const UploadPage: React.FC = () => {
             <select
               value={category}
               onChange={e => setCategory(e.target.value as any)}
-              className="w-full text-xs border border-slate-300 rounded-lg p-2 bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+              className="w-full text-xs border border-slate-300 rounded-lg p-2 bg-white focus:outline-hidden focus:ring-2 focus:ring-[#15803D] focus:border-[#15803D]"
             >
               <option value="Land Record">Land Record (7/12 Extract, Khasra)</option>
               <option value="Ownership Record">Ownership Record (Sale Deed, Title)</option>
@@ -210,14 +199,15 @@ export const UploadPage: React.FC = () => {
         </div>
 
         {/* Selected File Details Summary */}
-        <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between text-xs">
+        <div className="p-3 bg-white border border-[#E2E8F0] rounded-lg flex items-center justify-between text-xs">
           <div className="flex items-center space-x-2">
-            <FileText className="w-4 h-4 text-emerald-800" />
+            <FileText className="w-4 h-4 text-[#475569]" />
             <span className="font-semibold text-slate-800">{fileName}</span>
-            <span className="text-slate-400">({fileSize} • {pageCount} pages)</span>
+            <span className="text-slate-400 tabular-nums">({fileSize} • {pageCount} pages)</span>
           </div>
-          <span className="text-emerald-700 font-medium flex items-center">
-            <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Ready for Submission
+          <span className="inline-flex items-center gap-1.5 text-xs text-[#0F172A]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#15803D]" />
+            Ready for submission
           </span>
         </div>
 
@@ -225,48 +215,43 @@ export const UploadPage: React.FC = () => {
         <button
           type="submit"
           disabled={isUploading}
-          className="w-full py-3 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-bold shadow-md flex items-center justify-center space-x-2 transition cursor-pointer disabled:opacity-60"
+          className="w-full py-2.5 bg-[#166534] hover:bg-[#14532D] text-white rounded-[6px] text-xs font-bold flex items-center justify-center space-x-2 transition cursor-pointer disabled:opacity-60 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#15803D]"
         >
           {isUploading ? (
             <span>Processing Submission...</span>
           ) : (
             <>
-              <span>{isCitizen ? 'Submit Request for Verification' : 'Initiate AI Extraction Pipeline'}</span>
+              <span>{isCitizen ? 'Submit Request for Verification' : 'Submit for processing'}</span>
               <ArrowRight className="w-4 h-4" />
             </>
           )}
         </button>
       </form>
 
-      {/* Citizen Success Animated Popup Modal */}
+      {/* Citizen Success Modal */}
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-emerald-100 text-center relative animate-scaleUp">
-            {/* Animated Checkmark Icon */}
-            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5 ring-8 ring-emerald-50 relative">
-              <div className="w-14 h-14 bg-emerald-600 rounded-full flex items-center justify-center text-white shadow-lg animate-bounce">
-                <Check className="w-8 h-8 stroke-[3]" />
-              </div>
-            </div>
+          <div className="bg-white rounded-[8px] max-w-md w-full p-6 sm:p-8 shadow-xl border border-slate-200 text-center relative animate-scaleUp">
+            {/* Plain 44px Checkmark Icon */}
+            <Check className="w-11 h-11 text-[#166534] stroke-[2.5] mx-auto mb-3" />
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100/80 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-2">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+            <div className="text-[11px] font-bold uppercase tracking-wider text-[#15803D] mb-1">
               Submission Registered
             </div>
 
-            <h2 className="text-2xl font-black text-slate-900">
-              Request Submitted Successfully!
+            <h2 className="text-xl font-bold text-slate-900">
+              Request Submitted
             </h2>
             
-            <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-              Your land document verification request has been safely received and queued for official scrutiny. You will receive SMS & portal updates as the verification progresses.
+            <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
+              Your request has been received and queued for verification. Updates will be sent via SMS and portal.
             </p>
 
             {/* Acknowledgment Slip Card */}
-            <div className="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-200 text-left space-y-2.5 text-xs">
+            <div className="mt-5 p-4 rounded-[8px] bg-slate-50 border border-slate-200 text-left space-y-2.5 text-xs">
               <div className="flex items-center justify-between pb-2 border-b border-slate-200">
                 <span className="text-slate-500 font-medium">Acknowledgment ID:</span>
-                <span className="font-mono font-bold text-emerald-800 text-sm">{acknowledgmentId}</span>
+                <span className="font-mono tabular-nums font-bold text-[#0F172A] text-sm">{acknowledgmentId}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-slate-500">Document File:</span>
@@ -286,9 +271,9 @@ export const UploadPage: React.FC = () => {
             <div className="mt-6 flex flex-col gap-2.5">
               <Link
                 to="/citizen/requests"
-                className="w-full py-2.5 px-4 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-2.5 px-4 bg-[#166534] hover:bg-[#14532D] text-white rounded-[8px] text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>View in My Submissions</span>
+                <span>View Submission</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
 
@@ -296,14 +281,14 @@ export const UploadPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleResetForAnother}
-                  className="py-2.5 px-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-1.5"
+                  className="py-2.5 px-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-[8px] text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Submit Another</span>
                 </button>
                 <Link
                   to="/citizen-dashboard"
-                  className="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-semibold transition text-center flex items-center justify-center"
+                  className="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-[8px] text-xs font-semibold transition text-center flex items-center justify-center"
                 >
                   Dashboard
                 </Link>

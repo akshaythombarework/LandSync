@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { mockApi } from '../services/mockApi';
 import { AuditLog } from '../types';
 import { LoadingState } from '../components/ui/FeedbackStates';
+import { PageHeader } from '../components/ui/PageHeader';
 import { History, Search, ShieldCheck, Filter, Clock } from 'lucide-react';
 
 export const AuditPage: React.FC = () => {
@@ -19,7 +20,7 @@ export const AuditPage: React.FC = () => {
       setLogs(data);
     } catch (err) {
       console.error('Audit logs fetch error:', err);
-      setError('Failed to fetch audit logs from backend.');
+      setError('Failed to fetch audit logs. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -60,38 +61,32 @@ export const AuditPage: React.FC = () => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div>
-        <h1 className="text-xl font-black text-slate-900 flex items-center space-x-2">
-          <History className="w-5 h-5 text-emerald-800" />
-          <span>System Audit Trail & Provenance History</span>
-        </h1>
-        <p className="text-xs text-slate-500 mt-1">
-          Cryptographically auditable chronological log of all document uploads, AI extractions, human corrections, and officer approvals.
-        </p>
-      </div>
+      <PageHeader
+        title="Audit Trail"
+      />
 
-      {/* Filter & Search */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row gap-3 items-center justify-between">
+      {/* Filter & Search — flat, no card */}
+      <div className="flex flex-col sm:flex-row gap-3 items-center">
         <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#475569] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search action, description, officer name..."
+            placeholder="Search action, description, or officer"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-hidden"
+            className="w-full pl-9 pr-3 py-1.5 text-xs border border-[#CBD5E1] rounded-[6px] focus:outline-hidden focus:ring-2 focus:ring-[#166534] focus:border-[#166534]"
           />
         </div>
 
         <div className="flex items-center space-x-2 w-full sm:w-auto text-xs">
-          <Filter className="w-3.5 h-3.5 text-slate-500" />
-          <span className="font-semibold text-slate-600">Entity:</span>
+          <Filter className="w-4 h-4 text-[#475569]" />
+          <span className="font-semibold text-slate-500">Entity &middot;</span>
           <select
             value={entityFilter}
             onChange={e => setEntityFilter(e.target.value)}
-            className="text-xs border border-slate-300 rounded px-2.5 py-1.5 bg-white font-medium text-slate-700 focus:outline-hidden"
+            className="text-xs border border-[#CBD5E1] rounded-[6px] px-2.5 py-1.5 bg-white text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-[#166534] focus:border-[#166534]"
           >
-            <option value="ALL">All Entities ({logs.length})</option>
+            <option value="ALL">All ({logs.length})</option>
             <option value="record">Land Records</option>
             <option value="document">Documents</option>
           </select>
@@ -99,16 +94,16 @@ export const AuditPage: React.FC = () => {
       </div>
 
       {/* Audit Log Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white rounded-lg border border-[#E2E8F0] shadow-[0_1px_2px_rgba(0,0,0,0.04)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-500 border-b border-slate-200 uppercase font-semibold">
+            <thead className="bg-white text-slate-500 border-b border-[#E2E8F0]">
               <tr>
-                <th className="px-4 py-3">Timestamp</th>
-                <th className="px-4 py-3">User & Role</th>
-                <th className="px-4 py-3">Action</th>
-                <th className="px-4 py-3">Target Entity</th>
-                <th className="px-4 py-3">Details / Change Description</th>
+                <th className="px-4 py-3 font-semibold text-[10px]">Timestamp</th>
+                <th className="px-4 py-3 font-semibold text-[10px]">User & role</th>
+                <th className="px-4 py-3 font-semibold text-[10px]">Action</th>
+                <th className="px-4 py-3 font-semibold text-[10px]">Target entity</th>
+                <th className="px-4 py-3 font-semibold text-[10px]">Details</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -118,28 +113,38 @@ export const AuditPage: React.FC = () => {
                     No audit records match your query.
                   </td>
                 </tr>
-              ) : filteredLogs.map(log => (
-                <tr key={log.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-3 text-slate-500 whitespace-nowrap font-mono text-[11px]">
-                    {log.timestamp}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="font-bold text-slate-900">{log.userName}</div>
-                    <div className="text-[10px] text-slate-400 uppercase">{log.userRole.replace('_', ' ')}</div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-50 text-blue-800 border border-blue-200">
-                      {log.action}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 font-semibold text-slate-700 whitespace-nowrap">
-                    {log.entityType.toUpperCase()}: <span className="text-blue-900">{log.entityId}</span>
-                  </td>
-                  <td className="px-4 py-3 text-slate-600 font-medium leading-relaxed">
-                    {log.description}
-                  </td>
-                </tr>
-              ))}
+              ) : filteredLogs.map(log => {
+                const displayName = log.userName === 'System AI Worker' ? 'System Automation' : log.userName;
+                const formattedRole = 
+                  log.userRole.toLowerCase() === 'verification_officer' ? 'Verification officer' :
+                  log.userRole.toLowerCase() === 'district_officer' ? 'District officer' :
+                  log.userRole.toLowerCase() === 'state_officer' ? 'State officer' :
+                  log.userRole.toLowerCase() === 'admin' ? 'Admin' :
+                  log.userRole.replace(/_/g, ' ').toLowerCase().replace(/^\w/, c => c.toUpperCase());
+
+                return (
+                  <tr key={log.id} className="hover:bg-[#F8FAF8] transition-colors h-[56px]">
+                    <td className="px-4 py-3 text-slate-500 whitespace-nowrap font-mono text-[11px] tabular-nums">
+                      {log.timestamp}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="font-bold text-slate-900">{displayName}</div>
+                      <div className="text-[11px] text-[#475569]">{formattedRole}</div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="font-mono text-xs text-[#334155]">
+                        {log.action}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 font-semibold text-slate-700 whitespace-nowrap tabular-nums">
+                      {log.entityType.toUpperCase()}: <span className="text-[#0B1F33]">{log.entityId}</span>
+                    </td>
+                    <td className="px-4 py-3 text-slate-600 font-medium leading-relaxed">
+                      {log.description}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

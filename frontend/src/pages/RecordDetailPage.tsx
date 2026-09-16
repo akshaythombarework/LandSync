@@ -2,9 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { mockApi } from '../services/mockApi';
+import { ApiService } from '../services/api';
 import { LandRecord } from '../types';
+import type {
+  MasterDataMatch,
+  DuplicateCandidate,
+  ConflictSummary,
+  RecordRisk,
+  ReviewRouting,
+  GisLinkageInfo,
+  FlagExplanation,
+} from '../types/intelligence';
 import { StatusBadge, ConfidenceBadge } from '../components/ui/Badge';
 import { LoadingState } from '../components/ui/FeedbackStates';
+import {
+  MasterDataVerificationPanel,
+  DuplicateDetectionPanel,
+  ConflictAnomalyPanel,
+  RecordRiskPanel,
+  ReviewRoutingPanel,
+  GisLinkageCard,
+  WhyFlaggedDrawer,
+  CorrectionHistoryPanel,
+} from '../components/ui/IntelligenceCards';
 import { useLanguage } from '../context/LanguageContext';
 import { 
   ArrowLeft, 
@@ -47,6 +67,17 @@ export const RecordDetailPage: React.FC = () => {
   const [manualViewToggle, setManualViewToggle] = useState<boolean | null>(null);
   const isMarathiView = manualViewToggle !== null ? manualViewToggle : (language === 'mr' || language === 'hi');
 
+  // Round-2 intelligence state — all undefined until backend responds
+  const [masterDataMatch, setMasterDataMatch] = useState<MasterDataMatch | undefined>();
+  const [duplicateStatus, setDuplicateStatus] = useState<DuplicateCandidate | undefined>();
+  const [conflictSummary, setConflictSummary] = useState<ConflictSummary | undefined>();
+  const [recordRisk, setRecordRisk] = useState<RecordRisk | undefined>();
+  const [reviewRouting, setReviewRouting] = useState<ReviewRouting | undefined>();
+  const [gisLinkage, setGisLinkage] = useState<GisLinkageInfo | undefined>();
+  const [flagExplanations] = useState<FlagExplanation[]>([]); // populated by backend
+  const [showWhyFlagged, setShowWhyFlagged] = useState(false);
+  const [correctionHistory] = useState<any[]>([]); // populated by backend
+
   const handleApprove = async () => {
     if (!record) return;
     setActionLoading(true);
@@ -58,7 +89,7 @@ export const RecordDetailPage: React.FC = () => {
       setTimeout(() => setActionMessage(null), 4000);
     } catch (e) {
       console.error('Approve failed:', e);
-      setActionMessage('Failed to approve record. Please check backend.');
+      setActionMessage('Failed to approve record. Please try again.');
     } finally {
       setActionLoading(false);
     }
@@ -90,6 +121,16 @@ export const RecordDetailPage: React.FC = () => {
       const data = await mockApi.getRecord(targetId);
       setRecord(data || null);
       setLoading(false);
+
+      // Load Round-2 intelligence non-blocking
+      if (data) {
+        ApiService.getMasterDataMatch(data.id).then(m => setMasterDataMatch(m ?? undefined));
+        ApiService.getDuplicateStatus(data.id).then(d => setDuplicateStatus(d ?? undefined));
+        ApiService.getConflictSummary(data.id).then(c => setConflictSummary(c ?? undefined));
+        ApiService.getRecordRisk(data.id).then(r => setRecordRisk(r ?? undefined));
+        ApiService.getReviewRouting(data.id).then(r => setReviewRouting(r ?? undefined));
+        ApiService.getGisLinkage(data.id).then(g => setGisLinkage(g ?? undefined));
+      }
     };
     fetchRecord();
   }, [recordId]);
@@ -196,80 +237,80 @@ export const RecordDetailPage: React.FC = () => {
         }
       `}</style>
 
-      {/* Action Navigation Header (Hidden when printing) */}
-      <div className="flex flex-wrap items-center justify-between gap-3 no-print bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 no-print border-b border-slate-200 pb-3 mb-2">
         <Link
           to="/records"
-          className="inline-flex items-center text-xs font-semibold text-slate-600 hover:text-slate-900 transition"
+          className="inline-flex items-center text-xs font-semibold text-slate-500 hover:text-slate-900 transition"
         >
-          <ArrowLeft className="w-4 h-4 mr-1 text-slate-500" />
+          <ArrowLeft className="w-4 h-4 mr-1" />
           <span>{t('Back to Records Directory')}</span>
         </Link>
 
-        <div className="flex items-center flex-wrap gap-2.5">
+        <div className="flex items-center flex-wrap gap-2">
           {/* Language Toggle */}
           <button
             onClick={() => setManualViewToggle(!isMarathiView)}
-            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition border border-slate-300"
+            className="px-3 py-1.5 bg-white border border-[#CBD5E1] hover:bg-slate-50 text-[#334155] rounded-[6px] text-xs font-semibold flex items-center space-x-1.5 transition cursor-pointer"
             title={t("Toggle Bilingual / English View")}
           >
-            <span className="font-bold text-emerald-800">अ/A</span>
+            <span className="font-bold text-[#166534]">अ/A</span>
             <span>{isMarathiView ? t('English View') : t('मराठी / Bilingual View')}</span>
           </button>
 
           {/* Locate on Map */}
           <Link
             to="/map"
-            className="px-3.5 py-1.5 bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-800 rounded-lg text-xs font-bold shadow-2xs flex items-center space-x-1.5 transition"
+            className="px-3 py-1.5 bg-white border border-[#CBD5E1] hover:bg-slate-50 text-[#334155] rounded-[6px] text-xs font-semibold flex items-center space-x-1.5 transition"
           >
-            <MapPin className="w-3.5 h-3.5 text-blue-600" />
-            <span>{t('Locate on GIS Map')}</span>
+            <MapPin className="w-3.5 h-3.5 text-[#475569]" />
+            <span>View on map</span>
           </Link>
 
           {/* Print Button */}
           <button
             onClick={() => window.print()}
-            className="px-4 py-1.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-bold shadow-xs flex items-center space-x-1.5 transition"
+            className="px-3 py-1.5 bg-[#166534] hover:bg-[#14532D] text-white rounded-[6px] text-xs font-semibold flex items-center space-x-1.5 transition cursor-pointer"
           >
-            <Printer className="w-3.5 h-3.5 text-amber-300" />
-            <span>{t('Print Official Certificate')}</span>
+            <Printer className="w-3.5 h-3.5" />
+            <span>{t('Print Certificate')}</span>
           </button>
         </div>
       </div>
 
       {/* Action Notification Message */}
       {actionMessage && (
-        <div className="no-print p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center space-x-2 animate-fadeIn">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+        <div className="no-print p-3 rounded-lg bg-white border border-[#166534] text-slate-800 text-xs font-semibold flex items-center space-x-2 animate-fadeIn shadow-xs">
+          <CheckCircle2 className="w-4 h-4 text-[#166534] shrink-0" />
           <span>{actionMessage}</span>
         </div>
       )}
 
-      {/* Officer Decision & Approval Action Bar (for officers or non-approved records) */}
+      {/* Officer Decision & Approval Action Bar */}
       {currentUser?.role !== 'citizen' && (
-        <div className="no-print bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+        <div className="no-print bg-white border border-[#E2E8F0] border-l-[3px] border-l-[#D97706] rounded-lg px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
           <div className="flex items-center space-x-2.5">
-            <div className="p-2 bg-amber-100 text-amber-800 rounded-lg">
-              <ShieldCheck className="w-5 h-5 text-amber-700" />
-            </div>
+            <ShieldCheck className="w-4 h-4 text-[#475569] shrink-0" />
             <div>
-              <div className="text-xs font-bold text-amber-950 flex items-center space-x-2">
-                <span>Administrative Actions</span>
-                <StatusBadge status={record.status} size="sm" />
+              <div className="text-xs font-semibold text-slate-900 flex items-center space-x-2">
+                <span>Officer Actions</span>
+                <span className="inline-flex items-center text-xs font-medium text-[#0F172A] space-x-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#15803D]"></span>
+                  <span>Approved</span>
+                </span>
               </div>
-              <p className="text-[11px] text-amber-800 mt-0.5">
-                Current record verification status: <strong>{record.status}</strong>. Officers can approve, reject, or open the review workspace.
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Status &middot; Approved
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
+          <div className="flex items-center space-x-2">
             <Link
               to={`/verification/${record.id}`}
-              className="px-3 py-1.5 bg-white border border-amber-300 hover:bg-amber-100 text-amber-900 rounded-lg text-xs font-bold shadow-2xs flex items-center space-x-1.5 transition"
+              className="px-3 py-1.5 bg-white border border-[#CBD5E1] hover:bg-slate-50 text-[#334155] rounded-[6px] text-xs font-semibold flex items-center space-x-1.5 transition"
             >
-              <CheckSquare className="w-3.5 h-3.5 text-amber-700" />
-              <span>Review Workspace</span>
+              <CheckSquare className="w-3.5 h-3.5 text-[#475569]" />
+              <span>Review workspace</span>
             </Link>
 
             {record.status !== 'APPROVED' && (
@@ -277,16 +318,16 @@ export const RecordDetailPage: React.FC = () => {
                 <button
                   onClick={handleApprove}
                   disabled={actionLoading}
-                  className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold shadow-2xs flex items-center space-x-1.5 transition disabled:opacity-50"
+                  className="px-3 py-1.5 bg-[#166534] hover:bg-[#14532D] text-white rounded-[6px] text-xs font-semibold flex items-center space-x-1.5 transition disabled:opacity-50"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                  <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>{actionLoading ? 'Processing...' : 'Approve & Certify'}</span>
                 </button>
 
                 <button
                   onClick={() => setShowRejectModal(true)}
                   disabled={actionLoading}
-                  className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold shadow-2xs flex items-center space-x-1.5 transition disabled:opacity-50"
+                  className="px-3 py-1.5 bg-[#DC2626] hover:bg-[#B91C1C] text-white rounded-[6px] text-xs font-semibold flex items-center space-x-1.5 transition disabled:opacity-50"
                 >
                   <XCircle className="w-3.5 h-3.5 text-white" />
                   <span>Reject</span>
@@ -296,6 +337,52 @@ export const RecordDetailPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Round-2 Intelligence Panel Row (no-print) */}
+      <div className="no-print space-y-4">
+        {/* Section Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900">Record Verification</h2>
+          </div>
+          {record.status === 'REVIEW_REQUIRED' && (
+            <button
+              onClick={() => setShowWhyFlagged(true)}
+              className="px-3 py-1.5 bg-white border border-[#A16207]/30 text-[#A16207] rounded-[6px] text-xs font-bold flex items-center space-x-1.5 transition"
+            >
+              <span>Why Was This Flagged?</span>
+            </button>
+          )}
+        </div>
+
+        {/* Top row: Risk + Review Routing */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <RecordRiskPanel risk={recordRisk} />
+          <ReviewRoutingPanel routing={reviewRouting} />
+        </div>
+
+        {/* Middle row: Master Data + Duplicate */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <MasterDataVerificationPanel match={masterDataMatch} />
+          <DuplicateDetectionPanel duplicate={duplicateStatus} />
+        </div>
+
+        {/* Conflicts full width */}
+        <ConflictAnomalyPanel summary={conflictSummary} />
+
+        {/* GIS Linkage + Correction History */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <GisLinkageCard linkage={gisLinkage} recordId={record.id} />
+          <CorrectionHistoryPanel entries={correctionHistory} />
+        </div>
+      </div>
+
+      {/* Why Flagged Drawer */}
+      <WhyFlaggedDrawer
+        open={showWhyFlagged}
+        onClose={() => setShowWhyFlagged(false)}
+        explanations={flagExplanations}
+      />
 
       {/* Reject Modal */}
       {showRejectModal && (
@@ -335,12 +422,12 @@ export const RecordDetailPage: React.FC = () => {
       )}
 
       {/* MASTER GOVERNMENT DIGITAL CERTIFICATE */}
-      <div className="certificate-container bg-white rounded-2xl border-4 border-double border-emerald-900/40 shadow-xl p-8 sm:p-10 space-y-7 relative overflow-hidden text-slate-900">
+      <div className="certificate-container bg-white rounded-[8px] border-4 border-double border-slate-300 shadow-xl p-8 sm:p-10 space-y-7 relative overflow-hidden text-slate-900">
         
         {/* Subtle Guilloche / Security Pattern Watermark */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center select-none overflow-hidden">
-          <div className="w-[600px] h-[600px] rounded-full border-[24px] border-emerald-950 flex items-center justify-center">
-            <div className="w-[480px] h-[480px] rounded-full border-[12px] border-dashed border-emerald-950 flex flex-col items-center justify-center text-center p-8">
+          <div className="w-[600px] h-[600px] rounded-full border-[24px] border-[#166534] flex items-center justify-center">
+            <div className="w-[480px] h-[480px] rounded-full border-[12px] border-dashed border-[#166534] flex flex-col items-center justify-center text-center p-8">
               <span className="text-3xl font-black tracking-widest uppercase">सत्यमेव जयते</span>
               <span className="text-xl font-bold mt-2">GOVERNMENT OF MAHARASHTRA</span>
               <span className="text-sm font-semibold tracking-wider mt-1">REVENUE DEPARTMENT • MAHABHULEKH</span>
@@ -350,21 +437,29 @@ export const RecordDetailPage: React.FC = () => {
         </div>
 
         {/* TOP ORNAMENTAL SECURITY BAR */}
-        <div className="h-2 bg-linear-to-r from-emerald-900 via-amber-600 to-emerald-900 rounded-xs"></div>
+        <div className="h-1.5 bg-linear-to-r from-[#0F172A] via-[#166534] to-[#0F172A] rounded-xs"></div>
 
         {/* 1. OFFICIAL EMBLEM & HEADERS */}
         <div className="border-b-2 border-slate-900 pb-5 text-center relative">
           
           {/* Top Badges (Approved & State) */}
           <div className="flex justify-between items-center mb-3">
-            <div className="flex items-center space-x-2 text-[10px] uppercase font-bold tracking-wider text-emerald-900 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-300/80">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+            <div className="flex items-center space-x-1.5 text-[11px] font-bold tracking-wider text-[#15803D] bg-transparent px-2.5 py-1 rounded-[6px] border border-[#15803D]/30 uppercase">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#15803D]" />
               <span>Digitally Certified Extract</span>
             </div>
 
             <div className="flex items-center space-x-2">
-              <StatusBadge status={record.status} />
-              <div className="hidden sm:inline-block text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-300">
+              {record.status === 'APPROVED' ? (
+                <span className="px-2 py-0.5 text-[11px] font-semibold border border-[#15803D]/30 text-[#15803D] bg-transparent rounded-[6px]">
+                  Approved
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 text-[11px] font-semibold border border-[#A16207]/30 text-[#A16207] bg-transparent rounded-[6px]">
+                  Review Required
+                </span>
+              )}
+              <div className="hidden sm:inline-block text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-[6px] border border-slate-300">
                 Form VII, XII & VIII-A
               </div>
             </div>
@@ -373,7 +468,7 @@ export const RecordDetailPage: React.FC = () => {
           {/* Ashoka Stambh / State Emblem Icon Styled Representation */}
           <div className="flex justify-center mb-2">
             <div className="relative">
-              <div className="w-14 h-14 rounded-full bg-linear-to-b from-emerald-900 to-emerald-950 flex items-center justify-center text-amber-400 shadow-md border-2 border-amber-500/80">
+              <div className="w-14 h-14 rounded-full bg-[#166534] flex items-center justify-center text-amber-400 shadow-md border-2 border-amber-500/80">
                 <Landmark className="w-7 h-7 text-amber-300" />
               </div>
               <div className="absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 p-0.5 rounded-full border border-white">
@@ -384,7 +479,7 @@ export const RecordDetailPage: React.FC = () => {
 
           {/* Bilingual Government Heading */}
           <div className="space-y-0.5">
-            <div className="text-sm font-bold text-emerald-950 tracking-wider">
+            <div className="text-sm font-bold text-[#166534] tracking-wider">
               महाराष्ट्र शासन • महसूल व वन विभाग
             </div>
             <div className="text-xs uppercase font-extrabold tracking-widest text-slate-800">
@@ -396,25 +491,25 @@ export const RecordDetailPage: React.FC = () => {
                 : 'Certified Digital Land Record Certificate (Record of Rights / 7/12)'}
             </h1>
             <p className="text-[11px] text-slate-600 font-medium">
-              Issued under Maharashtra Land Revenue Code, 1966 & Certified by NovaaX AI-Assisted Digitization Framework
+              Issued under Maharashtra Land Revenue Code, 1966
             </p>
           </div>
 
           {/* ULPIN & Certificate Barcode Strip */}
-          <div className="mt-4 pt-3 border-t border-dashed border-slate-300 grid grid-cols-1 sm:grid-cols-3 gap-3 items-center text-xs bg-stone-50/70 p-3 rounded-lg border border-slate-200">
+          <div className="mt-4 pt-3 border-t border-dashed border-slate-300 grid grid-cols-1 sm:grid-cols-3 gap-3 items-center text-xs bg-slate-50 p-3 rounded-[6px] border border-slate-200">
             {/* ULPIN (Bhu-Aadhaar) */}
             <div className="text-left flex items-center space-x-2">
-              <Hash className="w-4 h-4 text-emerald-800 shrink-0" />
+              <Hash className="w-4 h-4 text-[#166534] shrink-0" />
               <div>
                 <span className="text-[10px] uppercase font-bold text-slate-500 block">ULPIN (Bhu-Aadhaar No.)</span>
-                <span className="font-mono font-bold text-emerald-950 flex items-center">
+                <span className="font-mono font-bold text-slate-900 flex items-center">
                   {ulpinNo}
                   <button 
                     onClick={copyUlpin}
                     className="ml-1 text-slate-400 hover:text-slate-700 p-0.5 no-print"
                     title="Copy ULPIN"
                   >
-                    {copiedId ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                    {copiedId ? <Check className="w-3 h-3 text-[#166534]" /> : <Copy className="w-3 h-3" />}
                   </button>
                 </span>
               </div>
@@ -438,13 +533,13 @@ export const RecordDetailPage: React.FC = () => {
         <div className="space-y-2">
           <div className="flex items-center justify-between border-b border-slate-300 pb-1.5">
             <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center space-x-1.5">
-              <Building className="w-3.5 h-3.5 text-emerald-800" />
+              <Building className="w-3.5 h-3.5 text-[#166534]" />
               <span>1. Administrative Jurisdiction & Revenue Office (प्रशासकीय कार्यक्षेत्र)</span>
             </h3>
             <span className="text-[10px] font-semibold text-slate-500">LGD Village Code: <strong>{lgd}</strong></span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3 rounded-[6px] border border-slate-200 text-xs">
             <div>
               <span className="text-slate-500 block text-[10px] uppercase font-bold">State (राज्य)</span>
               <span className="font-bold text-slate-900">{record.state || 'Maharashtra'}</span>
@@ -459,7 +554,7 @@ export const RecordDetailPage: React.FC = () => {
             </div>
             <div>
               <span className="text-slate-500 block text-[10px] uppercase font-bold">Village / Mouje (गाव / मौजे)</span>
-              <span className="font-bold text-slate-900 text-emerald-950">{record.village}</span>
+              <span className="font-bold text-slate-900 text-[#166534]">{record.village}</span>
             </div>
           </div>
         </div>
@@ -468,48 +563,48 @@ export const RecordDetailPage: React.FC = () => {
         <div className="space-y-3">
           <div className="flex items-center justify-between border-b border-slate-300 pb-1.5">
             <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center space-x-1.5">
-              <Layers className="w-3.5 h-3.5 text-emerald-800" />
+              <Layers className="w-3.5 h-3.5 text-[#166534]" />
               <span>2. Cadastral Parcel Identifiers & Land Demarcation (जमीन व भूमापन तपशील)</span>
             </h3>
-            <span className="text-[10px] bg-amber-50 text-amber-900 px-2 py-0.5 rounded font-bold border border-amber-300">
+            <span className="text-[10px] text-[#15803D] bg-transparent px-2 py-0.5 rounded-[6px] font-bold border border-[#15803D]/30">
               Verified Revenue Records
             </span>
           </div>
 
           {/* Prominent High-Impact Identity Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 p-4 bg-emerald-50/40 border border-emerald-200 rounded-xl text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 p-4 bg-slate-50 border border-slate-200 rounded-[8px] text-xs">
             {/* Gat Number */}
-            <div className="bg-white p-3 rounded-lg border border-emerald-200 shadow-2xs">
-              <span className="text-emerald-800 font-bold block text-[10px] uppercase">Gat Number (गट क्र.)</span>
-              <span className="text-lg font-black text-emerald-950">{gatNo}</span>
+            <div className="bg-white p-3 rounded-[6px] border border-slate-200 shadow-2xs">
+              <span className="text-[#166534] font-bold block text-[10px] uppercase">Gat Number (गट क्र.)</span>
+              <span className="text-lg font-black text-slate-900">{gatNo}</span>
               <span className="text-[10px] text-slate-500 block">Hissa No: <strong>{hissaNo}</strong></span>
             </div>
 
             {/* Survey / Khasra Number */}
-            <div className="bg-white p-3 rounded-lg border border-emerald-200 shadow-2xs">
-              <span className="text-emerald-800 font-bold block text-[10px] uppercase">Survey / Khasra No.</span>
+            <div className="bg-white p-3 rounded-[6px] border border-slate-200 shadow-2xs">
+              <span className="text-[#166534] font-bold block text-[10px] uppercase">Survey / Khasra No.</span>
               <span className="text-lg font-black text-slate-900">{record.surveyNumber}</span>
               <span className="text-[10px] text-slate-500 block">Khasra: <strong>{khasraNo}</strong></span>
             </div>
 
             {/* Khatauni / Khata Number */}
-            <div className="bg-white p-3 rounded-lg border border-emerald-200 shadow-2xs">
-              <span className="text-emerald-800 font-bold block text-[10px] uppercase">Khata No. (खाते क्र.)</span>
+            <div className="bg-white p-3 rounded-[6px] border border-slate-200 shadow-2xs">
+              <span className="text-[#166534] font-bold block text-[10px] uppercase">Khata No. (खाते क्र.)</span>
               <span className="text-lg font-black text-slate-900">{khataNo}</span>
               <span className="text-[10px] text-slate-500 block">Old Survey: <strong>118/A</strong></span>
             </div>
 
             {/* Revenue Circle */}
-            <div className="bg-white p-3 rounded-lg border border-emerald-200 shadow-2xs">
-              <span className="text-emerald-800 font-bold block text-[10px] uppercase">Revenue Circle (मंडळ)</span>
+            <div className="bg-white p-3 rounded-[6px] border border-slate-200 shadow-2xs">
+              <span className="text-[#166534] font-bold block text-[10px] uppercase">Revenue Circle (मंडळ)</span>
               <span className="text-sm font-bold text-slate-800 truncate block mt-0.5">{circle}</span>
               <span className="text-[10px] text-slate-500 block">Talathi Saja: 03</span>
             </div>
 
             {/* Land Classification */}
-            <div className="bg-white p-3 rounded-lg border border-emerald-200 shadow-2xs col-span-2 sm:col-span-1">
-              <span className="text-emerald-800 font-bold block text-[10px] uppercase">Classification (प्रकार)</span>
-              <span className="text-sm font-black text-emerald-900 block mt-0.5">{record.landClassification}</span>
+            <div className="bg-white p-3 rounded-[6px] border border-slate-200 shadow-2xs col-span-2 sm:col-span-1">
+              <span className="text-[#166534] font-bold block text-[10px] uppercase">Classification (प्रकार)</span>
+              <span className="text-sm font-black text-slate-900 block mt-0.5">{record.landClassification}</span>
               <span className="text-[10px] text-slate-500 block">{soil}</span>
             </div>
           </div>
@@ -519,19 +614,19 @@ export const RecordDetailPage: React.FC = () => {
         <div className="space-y-3">
           <div className="flex items-center justify-between border-b border-slate-300 pb-1.5">
             <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center space-x-1.5">
-              <Sprout className="w-3.5 h-3.5 text-emerald-800" />
+              <Sprout className="w-3.5 h-3.5 text-[#166534]" />
               <span>3. Certified Area & Land Assessment Details (क्षेत्र, आकारणी व प्रतवारी)</span>
             </h3>
-            <span className="text-[10px] text-slate-500 font-medium">Standard Metric: Hectare-Are-Sq.M</span>
+            <span className="text-[10px] text-slate-500 font-medium">Standard metric: hectare (ha) / sq.m</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
             {/* Total Area Box */}
-            <div className="bg-slate-50 p-3.5 rounded-lg border border-slate-200">
+            <div className="bg-slate-50 p-3.5 rounded-[6px] border border-slate-200">
               <span className="text-[10px] uppercase font-bold text-slate-500 block">Total Certified Area (एकूण क्षेत्र)</span>
               <div className="flex items-baseline space-x-2 mt-1">
-                <span className="text-2xl font-black text-emerald-900">{totalHectares}</span>
-                <span className="text-xs font-bold text-emerald-700">Hectares (हे.)</span>
+                <span className="text-2xl font-black text-slate-900">{totalHectares}</span>
+                <span className="text-xs font-bold text-[#166534]">Hectares (हे.)</span>
               </div>
               <div className="mt-2 pt-2 border-t border-slate-200 text-[11px] text-slate-600 flex justify-between">
                 <span>Equivalent: <strong>{totalAcres} Acres</strong></span>
@@ -540,7 +635,7 @@ export const RecordDetailPage: React.FC = () => {
             </div>
 
             {/* Cultivable vs Potkharaba breakdown */}
-            <div className="bg-slate-50 p-3.5 rounded-lg border border-slate-200 space-y-1.5">
+            <div className="bg-slate-50 p-3.5 rounded-[6px] border border-slate-200 space-y-1.5">
               <div className="flex justify-between items-center text-[11px]">
                 <span className="text-slate-600 font-medium">Cultivable Area (लागवडयोग्य):</span>
                 <strong className="text-slate-900">{cultivable} Ha</strong>
@@ -555,12 +650,12 @@ export const RecordDetailPage: React.FC = () => {
               </div>
               <div className="flex justify-between items-center text-[11px] pt-1 border-t border-slate-200">
                 <span className="text-slate-600 font-medium">Potkharaba (पोटखराबा - अकृषक):</span>
-                <strong className="text-amber-800">{potkharaba} Ha</strong>
+                <strong className="text-[#A16207]">{potkharaba} Ha</strong>
               </div>
             </div>
 
             {/* Assessment & Irrigation */}
-            <div className="bg-slate-50 p-3.5 rounded-lg border border-slate-200 space-y-2">
+            <div className="bg-slate-50 p-3.5 rounded-[6px] border border-slate-200 space-y-2">
               <div>
                 <span className="text-[10px] uppercase font-bold text-slate-500 block">Govt. Assessment (आकारणी रु.)</span>
                 <span className="font-extrabold text-slate-900 text-sm">{assessment}</span>
@@ -578,15 +673,15 @@ export const RecordDetailPage: React.FC = () => {
         <div className="space-y-3">
           <div className="flex items-center justify-between border-b border-slate-300 pb-1.5">
             <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center space-x-1.5">
-              <User className="w-3.5 h-3.5 text-emerald-800" />
+              <User className="w-3.5 h-3.5 text-[#166534]" />
               <span>4. Registered Landowner & Tenancy Information (भोगवटादार व सहखातेदार तपशील)</span>
             </h3>
-            <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+            <span className="text-[10px] font-bold text-[#15803D] bg-transparent px-2 py-0.5 rounded-[6px] border border-[#15803D]/30">
               UIDAI Bhu-Aadhaar Verified
             </span>
           </div>
 
-          <div className="border border-slate-200 rounded-lg overflow-hidden">
+          <div className="border border-slate-200 rounded-[8px] overflow-hidden">
             {/* Primary Holder Banner */}
             <div className="bg-slate-100 p-3.5 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
               <div>
@@ -603,7 +698,7 @@ export const RecordDetailPage: React.FC = () => {
 
               <div>
                 <span className="text-[10px] uppercase font-bold text-slate-500 block">Latest Mutation (फेरफार क्र.)</span>
-                <span className="font-bold text-blue-900 block mt-0.5">{record.mutationInfo || 'Mutation No. 4812 approved'}</span>
+                <span className="font-bold text-slate-900 block mt-0.5">{record.mutationInfo || 'Mutation No. 4812 approved'}</span>
                 <span className="text-[11px] text-slate-500">Registration: {record.registrationDate || '2021-02-14'}</span>
               </div>
             </div>
@@ -616,12 +711,12 @@ export const RecordDetailPage: React.FC = () => {
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {coOwners.map((owner, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200">
+                    <div key={idx} className="flex items-center justify-between p-2 rounded-[6px] bg-slate-50 border border-slate-200">
                       <div>
                         <span className="font-bold text-slate-900">{owner.name}</span>
                         <span className="text-[10px] text-slate-500 block">Relation: {owner.relation}</span>
                       </div>
-                      <span className="text-[11px] font-black text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      <span className="text-[11px] font-bold text-[#15803D] bg-transparent px-2 py-0.5 rounded-[6px] border border-[#15803D]/30">
                         {owner.share} Share
                       </span>
                     </div>
@@ -636,32 +731,32 @@ export const RecordDetailPage: React.FC = () => {
         <div className="space-y-3">
           <div className="flex items-center justify-between border-b border-slate-300 pb-1.5">
             <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center space-x-1.5">
-              <Compass className="w-3.5 h-3.5 text-emerald-800" />
+              <Compass className="w-3.5 h-3.5 text-[#166534]" />
               <span>5. Adjoining Boundaries & Geo-Spatial Location (चतुःसीमा व भू-स्थानक)</span>
             </h3>
-            <Link to="/map" className="text-[11px] font-bold text-blue-700 hover:underline flex items-center space-x-1 no-print">
-              <span>Interactive GIS View</span>
+            <Link to="/map" className="text-[11px] font-bold text-[#166534] hover:underline flex items-center space-x-1 no-print">
+              <span>View on GIS map</span>
               <ExternalLink className="w-3 h-3" />
             </Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             {/* Boundaries Compass Card */}
-            <div className="p-3 bg-stone-50 border border-slate-200 rounded-lg space-y-2">
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-[8px] space-y-2">
               <div className="grid grid-cols-2 gap-2">
-                <div className="p-2 bg-white rounded border border-slate-200">
+                <div className="p-2 bg-white rounded-[6px] border border-slate-200">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block">North (उत्तर सीमा)</span>
                   <span className="font-semibold text-slate-800 text-[11px]">{boundaries.north}</span>
                 </div>
-                <div className="p-2 bg-white rounded border border-slate-200">
+                <div className="p-2 bg-white rounded-[6px] border border-slate-200">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block">South (दक्षिण सीमा)</span>
                   <span className="font-semibold text-slate-800 text-[11px]">{boundaries.south}</span>
                 </div>
-                <div className="p-2 bg-white rounded border border-slate-200">
+                <div className="p-2 bg-white rounded-[6px] border border-slate-200">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block">East (पूर्व सीमा)</span>
                   <span className="font-semibold text-slate-800 text-[11px]">{boundaries.east}</span>
                 </div>
-                <div className="p-2 bg-white rounded border border-slate-200">
+                <div className="p-2 bg-white rounded-[6px] border border-slate-200">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block">West (पश्चिम सीमा)</span>
                   <span className="font-semibold text-slate-800 text-[11px]">{boundaries.west}</span>
                 </div>
@@ -669,13 +764,13 @@ export const RecordDetailPage: React.FC = () => {
             </div>
 
             {/* GIS Centroid & Spatial Integration */}
-            <div className="p-3.5 bg-blue-50/60 border border-blue-200 rounded-lg flex flex-col justify-between text-xs">
+            <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-[8px] flex flex-col justify-between text-xs">
               <div className="space-y-1.5">
-                <div className="flex items-center space-x-2 text-blue-900 font-bold">
-                  <MapPin className="w-4 h-4 text-blue-700 shrink-0" />
+                <div className="flex items-center space-x-2 text-slate-900 font-bold">
+                  <MapPin className="w-4 h-4 text-[#166534] shrink-0" />
                   <span>Geodetic Centroid Coordinates (WGS-84)</span>
                 </div>
-                <div className="font-mono text-xs bg-white px-2.5 py-1 rounded border border-blue-200 font-bold text-slate-800">
+                <div className="font-mono text-xs bg-white px-2.5 py-1 rounded-[6px] border border-slate-200 font-bold text-slate-800">
                   LAT: {record.latitude ? record.latitude.toFixed(6) : '18.579342'}° N • LON: {record.longitude ? record.longitude.toFixed(6) : '73.983210'}° E
                 </div>
                 <p className="text-[10px] text-slate-500 leading-normal">
@@ -684,8 +779,8 @@ export const RecordDetailPage: React.FC = () => {
               </div>
 
               <div className="pt-2 flex justify-between items-center text-[11px]">
-                <span className="text-slate-600">Polygon Status: <strong className="text-emerald-700">Closed & Non-Overlapping</strong></span>
-                <span className="text-blue-700 font-bold">SRID: EPSG:4326</span>
+                <span className="text-slate-600">Polygon Status: <strong className="text-[#15803D]">Closed & Non-Overlapping</strong></span>
+                <span className="text-slate-700 font-bold">SRID: EPSG:4326</span>
               </div>
             </div>
           </div>
@@ -695,21 +790,21 @@ export const RecordDetailPage: React.FC = () => {
         <div className="space-y-3">
           <div className="flex items-center justify-between border-b border-slate-300 pb-1.5">
             <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center space-x-1.5">
-              <Landmark className="w-3.5 h-3.5 text-emerald-800" />
+              <Landmark className="w-3.5 h-3.5 text-[#166534]" />
               <span>6. Liabilities, Bank Encumbrances & Other Rights (इतर अधिकार व बोजा)</span>
             </h3>
             <span className="text-[10px] text-slate-500">Section 148 MLR Code</span>
           </div>
 
-          <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
+          <div className="bg-slate-50 p-3 rounded-[8px] border border-slate-200 text-xs">
             {encumbrances.length > 0 ? (
               <div className="space-y-2">
                 {encumbrances.map((enc, idx) => (
-                  <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 bg-white rounded border border-slate-200 gap-2">
+                  <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 bg-white rounded-[6px] border border-slate-200 gap-2">
                     <div>
                       <div className="flex items-center space-x-2">
                         <span className="font-bold text-slate-900">{enc.institution}</span>
-                        <span className="text-[10px] bg-rose-50 text-rose-800 font-bold px-1.5 py-0.5 rounded border border-rose-200">
+                        <span className="text-[10px] text-[#DC2626] bg-transparent font-semibold px-2 py-0.5 rounded-[6px] border border-[#DC2626]">
                           Active Hypothecation
                         </span>
                       </div>
@@ -719,7 +814,7 @@ export const RecordDetailPage: React.FC = () => {
                     </div>
 
                     <div className="text-right sm:text-right text-left">
-                      <span className="font-black text-rose-900 text-sm">{enc.amount}</span>
+                      <span className="font-black text-slate-900 text-sm">{enc.amount}</span>
                       <span className="text-[10px] text-slate-500 block">Mutation No: <strong>{enc.mutationNo}</strong></span>
                     </div>
                   </div>
@@ -737,7 +832,7 @@ export const RecordDetailPage: React.FC = () => {
         <div className="space-y-3">
           <div className="flex items-center justify-between border-b border-slate-300 pb-1.5">
             <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center space-x-1.5">
-              <Sprout className="w-3.5 h-3.5 text-emerald-800" />
+              <Sprout className="w-3.5 h-3.5 text-[#166534]" />
               <span>7. Crop Survey & Land Utilization - Form 12 (चालू हंगाम पीक पाहणी)</span>
             </h3>
             <span className="text-[10px] text-slate-500">Year: 2025–2026</span>
@@ -745,9 +840,9 @@ export const RecordDetailPage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             {crops.map((crop, idx) => (
-              <div key={idx} className="p-3 bg-white rounded-lg border border-slate-200 flex justify-between items-center">
+              <div key={idx} className="p-3 bg-white rounded-[6px] border border-slate-200 flex justify-between items-center">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-emerald-800 block">{crop.season}</span>
+                  <span className="text-[10px] uppercase font-bold text-[#166534] block">{crop.season}</span>
                   <span className="font-bold text-slate-900 text-sm">{crop.cropName}</span>
                   <span className="text-[10px] text-slate-500 block">Irrigation: {crop.irrigationType}</span>
                 </div>
@@ -760,33 +855,33 @@ export const RecordDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 9. PROVENANCE PIPELINE AUDIT TRAIL */}
+        {/* 9. VERIFICATION & AUDIT TRAIL */}
         <div className="space-y-2 pt-1">
           <div className="flex items-center justify-between border-b border-slate-300 pb-1">
             <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center space-x-1.5">
-              <FileCheck className="w-3.5 h-3.5 text-emerald-800" />
-              <span>8. Provenance & Unbroken AI-to-Human Audit Lineage</span>
+              <FileCheck className="w-3.5 h-3.5 text-[#166534]" />
+              <span>8. VERIFICATION & AUDIT TRAIL</span>
             </h3>
             <span className="text-[10px] text-slate-500">Digital Record Lineage</span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 text-[11px] p-3 bg-slate-50 rounded-lg border border-slate-200">
-            <span className="px-2.5 py-1 bg-white border border-slate-200 rounded text-slate-700 font-medium">
-              Source Doc: <strong>{record.documentId}</strong>
-            </span>
-            <span className="text-slate-400 font-bold">➔</span>
-            <span className="px-2.5 py-1 bg-white border border-slate-200 rounded text-slate-700 font-medium">
-              Multilingual OCR Layout Engine
-            </span>
-            <span className="text-slate-400 font-bold">➔</span>
-            <span className="px-2.5 py-1 bg-white border border-slate-200 rounded text-slate-700 font-medium">
-              Cross-Validation Engine (Passed)
-            </span>
-            <span className="text-slate-400 font-bold">➔</span>
-            <span className="px-2.5 py-1 bg-emerald-100 text-emerald-900 border border-emerald-300 rounded font-bold flex items-center">
-              <CheckCircle2 className="w-3 h-3 mr-1 text-emerald-700" />
-              Officer Approved ({record.overallConfidence}% Confidence)
-            </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs p-3 bg-slate-50 rounded-[8px] border border-slate-200">
+            <div>
+              <span className="text-slate-500 block text-[10px] uppercase font-bold">Source document:</span>
+              <span className="font-semibold text-slate-900">{record.documentId}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 block text-[10px] uppercase font-bold">OCR:</span>
+              <span className="font-semibold text-slate-900">Multilingual OCR Layout Engine</span>
+            </div>
+            <div>
+              <span className="text-slate-500 block text-[10px] uppercase font-bold">Cross-validation:</span>
+              <span className="font-semibold text-slate-900">Passed</span>
+            </div>
+            <div>
+              <span className="text-slate-500 block text-[10px] uppercase font-bold">Officer approval:</span>
+              <span className="font-semibold text-[#15803D]">Approved</span>
+            </div>
           </div>
         </div>
 
@@ -794,7 +889,7 @@ export const RecordDetailPage: React.FC = () => {
         <div className="border-t-2 border-slate-900 pt-5 mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
           
           {/* Official Verification QR Code Box */}
-          <div className="flex items-center space-x-3 p-3 bg-slate-50 border border-slate-200 rounded-lg">
+          <div className="flex items-center space-x-3 p-3 bg-slate-50 border border-slate-200 rounded-[8px]">
             {/* SVG Visual Representation of Verifiable QR Code */}
             <div className="w-16 h-16 bg-white p-1 rounded border border-slate-300 shrink-0 flex items-center justify-center">
               <svg viewBox="0 0 100 100" className="w-full h-full text-slate-900" fill="currentColor">
@@ -813,9 +908,9 @@ export const RecordDetailPage: React.FC = () => {
               </svg>
             </div>
             <div className="text-[10px] space-y-0.5">
-              <span className="font-bold text-slate-800 block">Scan to Verify Authenticity</span>
-              <p className="text-slate-500">Scan using any standard QR reader to check public ledger registry status.</p>
-              <span className="text-[9px] font-mono text-emerald-800 block truncate">{ulpinNo}</span>
+              <span className="font-bold text-slate-800 block">Verify document</span>
+              <p className="text-slate-500">Scan to verify against the state registry.</p>
+              <span className="text-[9px] font-mono text-[#166534] block truncate">{ulpinNo}</span>
             </div>
           </div>
 
@@ -826,9 +921,9 @@ export const RecordDetailPage: React.FC = () => {
           </div>
 
           {/* Official Digital Signature Certificate */}
-          <div className="p-3 bg-emerald-50/60 border border-emerald-300 rounded-lg text-xs space-y-1">
-            <div className="flex items-center space-x-1.5 text-emerald-900 font-bold">
-              <Award className="w-4 h-4 text-emerald-700 shrink-0" />
+          <div className="p-3 bg-white border border-[#E2E8F0] border-l-[3px] border-l-[#166534] rounded-lg text-xs space-y-1">
+            <div className="flex items-center space-x-1.5 text-[#166534] font-bold">
+              <Award className="w-4 h-4 text-[#166534] shrink-0" />
               <span>Digitally Signed by Authority</span>
             </div>
             <div className="font-black text-slate-900 text-xs">
@@ -837,14 +932,14 @@ export const RecordDetailPage: React.FC = () => {
             <div className="text-[10px] text-slate-600">
               Sub-Divisional Officer / Tehsildar, Haveli Division, Pune
             </div>
-            <div className="text-[9px] font-mono text-slate-400 truncate pt-1 border-t border-emerald-200">
+            <div className="text-[9px] font-mono text-slate-400 truncate pt-1 border-t border-slate-100">
               Hash: {signatureHash.substring(0, 32)}...
             </div>
           </div>
         </div>
 
         {/* BOTTOM ORNAMENTAL SECURITY BAR */}
-        <div className="h-1.5 bg-linear-to-r from-emerald-900 via-amber-600 to-emerald-900 rounded-xs"></div>
+        <div className="h-1.5 bg-linear-to-r from-[#166534] via-[#A16207] to-[#166534] rounded-xs"></div>
       </div>
     </div>
   );

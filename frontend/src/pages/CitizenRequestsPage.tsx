@@ -16,6 +16,7 @@ import {
   Search,
   Filter
 } from 'lucide-react';
+import { PageHeader } from '../components/ui/PageHeader';
 
 type TabType = 'ALL' | 'PROCESSING' | 'ACCEPTED' | 'REJECTED' | 'GRIEVANCED' | 'REAPPLIED';
 
@@ -149,50 +150,45 @@ export const CitizenRequestsPage: React.FC = () => {
   const getStatusBadge = (status: CitizenSubmission['status'], label: string) => {
     switch (status) {
       case 'ACCEPTED':
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center space-x-1"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 mr-1" />{label}</span>;
+        return <span className="px-2.5 py-1 text-xs font-bold rounded-[6px] bg-transparent border border-[#15803D]/30 text-[#15803D] flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5 shrink-0" />{label}</span>;
       case 'UNDER_VERIFICATION':
       case 'PROCESSING':
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-amber-100 text-amber-900 border border-amber-300 flex items-center space-x-1"><Clock className="w-3.5 h-3.5 text-amber-700 mr-1" />{label}</span>;
+        return <span className="px-2.5 py-1 text-xs font-bold rounded-[6px] bg-transparent border border-[#A16207]/30 text-[#A16207] flex items-center gap-1"><Clock className="w-3.5 h-3.5 shrink-0" />{label}</span>;
       case 'REJECTED':
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-rose-100 text-rose-900 border border-rose-300 flex items-center space-x-1"><AlertTriangle className="w-3.5 h-3.5 text-rose-700 mr-1" />{label}</span>;
+        return <span className="px-2.5 py-1 text-xs font-bold rounded-[6px] bg-transparent border border-[#B91C1C]/30 text-[#B91C1C] flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5 shrink-0" />{label}</span>;
       case 'GRIEVANCE_SUBMITTED':
       case 'REAPPLIED':
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-purple-100 text-purple-900 border border-purple-300 flex items-center space-x-1"><RotateCcw className="w-3.5 h-3.5 text-purple-700 mr-1" />{label}</span>;
+        return <span className="px-2.5 py-1 text-xs font-bold rounded-[6px] bg-transparent border border-slate-400/30 text-slate-600 flex items-center gap-1"><RotateCcw className="w-3.5 h-3.5 shrink-0" />{label}</span>;
       default:
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-slate-100 text-slate-800">{label}</span>;
+        return <span className="px-2.5 py-1 text-xs font-bold rounded-[6px] bg-transparent border border-slate-300 text-slate-600">{label}</span>;
     }
   };
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-black text-slate-900 flex items-center space-x-2">
-            <FileText className="w-5 h-5 text-emerald-800" />
-            <span>{t('mySubmissions')}</span>
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Track all land verification requests submitted by you, review status changes, and file grievances on rejected applications.
-          </p>
-        </div>
-
-        <Link
-          to="/documents/upload"
-          className="px-4 py-2 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-bold shadow-sm flex items-center space-x-2 shrink-0 transition"
-        >
-          <Upload className="w-4 h-4" />
-          <span>Submit New Request</span>
-        </Link>
-      </div>
+      <PageHeader
+        title={t('mySubmissions') || 'My Submissions & Grievances'}
+        description="Your verification requests and grievances."
+        icon={FileText}
+        actions={
+          <Link
+            to="/documents/upload"
+            className="px-3.5 py-1.5 bg-[#166534] hover:bg-[#14532D] text-white rounded-[6px] text-xs font-semibold shadow-2xs flex items-center space-x-1.5 transition shrink-0 cursor-pointer"
+          >
+            <Upload className="w-4 h-4" />
+            <span>Submit New Request</span>
+          </Link>
+        }
+      />
 
       {/* Grievance Success Notice */}
       {grievanceSuccessMessage && (
-        <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-xl flex items-center space-x-3 text-xs text-emerald-900 animate-fadeIn">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+        <div className="p-4 bg-white border-l-4 border-[#166534] border border-slate-200 rounded-[6px] flex items-center space-x-3 text-xs text-slate-800 animate-fadeIn">
+          <CheckCircle2 className="w-5 h-5 text-[#166534] shrink-0" />
           <div>
-            <span className="font-bold">Grievance Registered:</span>
-            <p className="text-[11px] text-emerald-800 mt-0.5">{grievanceSuccessMessage}</p>
+            <span className="font-bold text-[#166534]">Grievance Registered:</span>
+            <p className="text-[11px] text-slate-600 mt-0.5">{grievanceSuccessMessage}</p>
           </div>
         </div>
       )}
@@ -206,7 +202,7 @@ export const CitizenRequestsPage: React.FC = () => {
             placeholder="Search request ID, survey #, village..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+            className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#15803D] focus:border-[#15803D]"
           />
         </div>
 
@@ -222,10 +218,10 @@ export const CitizenRequestsPage: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as TabType)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+              className={`px-3 py-1.5 text-xs font-bold transition-colors cursor-pointer border-b-2 ${
                 activeTab === tab.id
-                  ? 'bg-emerald-800 text-white shadow-2xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'text-[#166534] border-[#166534]'
+                  : 'text-slate-500 border-transparent hover:text-slate-700'
               }`}
             >
               {tab.label}
@@ -260,31 +256,31 @@ export const CitizenRequestsPage: React.FC = () => {
               </div>
 
               {/* Status Details */}
-              <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 text-xs space-y-1.5">
+              <div className="p-3.5 bg-white rounded-lg border border-[#E2E8F0] text-xs space-y-1.5">
                 <div className="flex items-start space-x-2">
                   <span className="font-bold text-slate-700 shrink-0">Current Status:</span>
                   <span className="text-slate-600">{sub.latestAction}</span>
                 </div>
                 <div className="flex items-start space-x-2">
-                  <span className="font-bold text-emerald-900 shrink-0">Required Action:</span>
-                  <span className="text-emerald-800 font-medium">{sub.nextAction}</span>
+                  <span className="font-bold text-[#475569] shrink-0">Required Action:</span>
+                  <span className="text-[#0F172A] font-medium">{sub.nextAction}</span>
                 </div>
 
                 {/* Rejection Notice */}
                 {sub.rejectionReason && (
-                  <div className="mt-2 pt-2 border-t border-slate-200 text-rose-950 bg-rose-50/70 p-3 rounded-lg">
-                    <span className="font-bold block mb-1">Reason for Rejection:</span>
-                    <p className="text-[11px] text-rose-800">{sub.rejectionReason}</p>
+                  <div className="mt-2 pt-2 border-t border-slate-100 bg-white border-l-[3px] border-l-[#B91C1C] pl-3 pr-2 py-2.5 rounded-r-md">
+                    <span className="font-bold block mb-1 text-[#B91C1C]">Reason for Rejection:</span>
+                    <p className="text-[11px] text-[#B91C1C]">{sub.rejectionReason}</p>
                   </div>
                 )}
 
                 {/* Grievance Note */}
                 {sub.grievanceNote && (
-                  <div className="mt-2 pt-2 border-t border-slate-200 text-purple-950 bg-purple-50/70 p-3 rounded-lg">
-                    <span className="font-bold block mb-1">Your Submitted Grievance:</span>
-                    <p className="text-[11px] text-purple-800">{sub.grievanceNote}</p>
+                  <div className="mt-2 pt-2 border-t border-slate-100 bg-slate-50 border border-slate-200 p-3 rounded-lg">
+                    <span className="font-bold block mb-1 text-slate-700">Your Submitted Grievance:</span>
+                    <p className="text-[11px] text-slate-600">{sub.grievanceNote}</p>
                     {sub.supportingDocName && (
-                      <div className="mt-1 text-[10px] font-bold text-purple-950 flex items-center space-x-1">
+                      <div className="mt-1 text-[10px] font-bold text-slate-700 flex items-center space-x-1">
                         <FileCheck2 className="w-3.5 h-3.5" />
                         <span>Supporting Document: {sub.supportingDocName}</span>
                       </div>
@@ -303,7 +299,7 @@ export const CitizenRequestsPage: React.FC = () => {
                   {sub.status === 'ACCEPTED' && sub.recordId && (
                     <Link
                       to={`/records/${sub.recordId}`}
-                      className="px-3.5 py-1.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-bold flex items-center space-x-1 transition cursor-pointer"
+                      className="px-3.5 py-1.5 bg-[#166534] hover:bg-[#14532D] text-white rounded-[6px] text-xs font-bold flex items-center space-x-1 transition cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       <span>View Certified Record</span>
@@ -313,16 +309,16 @@ export const CitizenRequestsPage: React.FC = () => {
                   {sub.status === 'REJECTED' && (
                     <button
                       onClick={() => handleOpenGrievance(sub)}
-                      className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-lg text-xs font-bold flex items-center space-x-1.5 transition shadow-2xs cursor-pointer"
+                      className="px-3.5 py-1.5 bg-transparent border border-[#A16207] text-[#A16207] rounded-[6px] text-xs font-bold flex items-center space-x-1.5 transition cursor-pointer hover:bg-[#A16207]/5"
                     >
-                      <RotateCcw className="w-3.5 h-3.5 text-slate-900" />
+                      <RotateCcw className="w-3.5 h-3.5" />
                       <span>Apply for Grievance</span>
                     </button>
                   )}
 
                   {sub.status === 'REAPPLIED' && (
-                    <span className="text-[11px] font-semibold text-purple-900 bg-purple-50 px-2.5 py-1 rounded-md border border-purple-200 flex items-center space-x-1">
-                      <Clock className="w-3 h-3 text-purple-600" />
+                    <span className="text-[11px] font-semibold text-slate-600 bg-transparent px-2.5 py-1 rounded-[6px] border border-slate-300 flex items-center space-x-1">
+                      <Clock className="w-3 h-3 text-slate-400" />
                       <span>Forwarded for Final Human Verification</span>
                     </span>
                   )}
@@ -336,21 +332,21 @@ export const CitizenRequestsPage: React.FC = () => {
       {/* Grievance Modal */}
       {selectedForGrievance && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden animate-fadeIn">
-            <div className="bg-gradient-to-r from-amber-600 to-amber-700 text-white p-6">
+          <div className="bg-white rounded-[8px] border border-slate-200 shadow-xl max-w-lg w-full overflow-hidden animate-fadeIn">
+            <div className="bg-white border-b border-slate-200 p-5">
               <div className="flex items-center space-x-2">
-                <RotateCcw className="w-6 h-6 text-amber-200" />
-                <h2 className="text-base font-black">Apply for Grievance & Reapply</h2>
+                <RotateCcw className="w-5 h-5 text-[#A16207]" />
+                <h2 className="text-sm font-bold text-slate-900">Apply for Grievance & Reapply</h2>
               </div>
-              <p className="text-xs text-amber-100 mt-1">
-                Request ID: <span className="font-mono font-bold">{selectedForGrievance.id}</span> (Survey {selectedForGrievance.surveyNumber}, {selectedForGrievance.village})
+              <p className="text-xs text-slate-500 mt-1">
+                Request ID: <span className="font-mono font-bold text-[#0F172A]">{selectedForGrievance.id}</span> (Survey {selectedForGrievance.surveyNumber}, {selectedForGrievance.village})
               </p>
             </div>
 
             <form onSubmit={handleSubmitGrievance} className="p-6 space-y-4 text-xs">
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-950">
-                <span className="font-bold block mb-1">Reason for Rejection:</span>
-                <p className="text-[11px] leading-relaxed text-rose-800">
+              <div className="bg-white border-l-[3px] border-l-[#B91C1C] pl-3 pr-2 py-2.5 rounded-r-md border border-slate-200">
+                <span className="font-bold block mb-1 text-[#B91C1C]">Reason for Rejection:</span>
+                <p className="text-[11px] leading-relaxed text-[#B91C1C]">
                   {selectedForGrievance.rejectionReason}
                 </p>
               </div>
@@ -365,7 +361,7 @@ export const CitizenRequestsPage: React.FC = () => {
                   value={grievanceText}
                   onChange={e => setGrievanceText(e.target.value)}
                   placeholder="State your clarification (e.g. Registered partition deed attached proves area is 3.10 hectares, discrepancy in 1984 record was rectified)..."
-                  className="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                  className="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-[#15803D] focus:border-[#15803D] focus:outline-hidden"
                 />
               </div>
 
@@ -373,7 +369,7 @@ export const CitizenRequestsPage: React.FC = () => {
                 <label className="block font-bold text-slate-700 mb-1">
                   Upload Supplementary Proof (PDF / JPG)
                 </label>
-                <div className="border-2 border-dashed border-slate-300 hover:border-emerald-600 rounded-xl p-4 text-center cursor-pointer bg-slate-50 transition">
+                <div className="border-2 border-dashed border-[#CBD5E1] hover:border-[#166534] rounded-lg p-4 text-center cursor-pointer bg-slate-50 transition">
                   <input
                     type="file"
                     accept=".pdf,.jpg,.jpeg,.png"
@@ -393,11 +389,11 @@ export const CitizenRequestsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl text-purple-950 text-[11px] leading-relaxed flex items-start space-x-2">
-                <ShieldAlert className="w-4 h-4 text-purple-700 shrink-0 mt-0.5" />
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-[6px] text-slate-600 text-[11px] leading-relaxed flex items-start space-x-2">
+                <ShieldAlert className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
                 <div>
-                  <strong>Mandatory Human Officer Review:</strong>
-                  <p className="mt-0.5 text-purple-800">
+                  <strong className="text-slate-700">Mandatory Human Officer Review:</strong>
+                  <p className="mt-0.5 text-slate-500">
                     Reapplied requests are strictly routed to the Tehsildar & Verification Officer worklist. Automated AI confidence policies are disabled for reapplied grievances.
                   </p>
                 </div>
@@ -413,7 +409,7 @@ export const CitizenRequestsPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-bold shadow-md flex items-center space-x-1.5 transition cursor-pointer"
+                  className="px-5 py-2.5 bg-[#166534] hover:bg-[#14532D] text-white rounded-[6px] text-xs font-bold flex items-center space-x-1.5 transition cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Submit Grievance & Reapply</span>

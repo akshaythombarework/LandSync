@@ -9,6 +9,26 @@ import {
   DocumentStatus,
   User,
 } from '../types';
+import type {
+  DocumentQuality,
+  DocumentClassification,
+  OCREvidence,
+  LayoutEvidence,
+  MasterDataMatch,
+  DuplicateCandidate,
+  ConflictSummary,
+  RecordRisk,
+  ReviewRouting,
+  CorrectionFeedback,
+  CorrectionHistoryEntry,
+  GisLinkageInfo,
+  IntegrationStatus,
+  ProcessingStats,
+  LanguagePerformance,
+  DocumentTypePerformance,
+  RegionalProgress,
+  HumanReviewQueueMetrics,
+} from '../types/intelligence';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
@@ -414,4 +434,236 @@ export class ApiService {
       metadata: a.metadata,
     }));
   }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Round-2 Intelligence API Stubs
+  // These are named integration points for future backend endpoints.
+  // They return null when the backend has not yet implemented the endpoint.
+  // Do NOT add mock/fake data here — the UI handles the empty state gracefully.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // 9. Document Quality
+  static async getDocumentQuality(docId: string): Promise<DocumentQuality | null> {
+    try {
+      const res = await fetch(`${API_BASE}/documents/${docId}/quality`, { headers: getHeaders() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data ?? json ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  // 10. Document Classification
+  static async getDocumentClassification(docId: string): Promise<DocumentClassification | null> {
+    try {
+      const res = await fetch(`${API_BASE}/documents/${docId}/classification`, { headers: getHeaders() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data ?? json ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  // 11. OCR Evidence for a field
+  static async getOCREvidence(docId: string, fieldName?: string): Promise<OCREvidence | null> {
+    try {
+      const url = fieldName
+        ? `${API_BASE}/documents/${docId}/ocr-evidence?field=${encodeURIComponent(fieldName)}`
+        : `${API_BASE}/documents/${docId}/ocr-evidence`;
+      const res = await fetch(url, { headers: getHeaders() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data ?? json ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  // 12. Layout Evidence
+  static async getLayoutEvidence(docId: string, fieldName?: string): Promise<LayoutEvidence | null> {
+    try {
+      const url = fieldName
+        ? `${API_BASE}/documents/${docId}/layout-evidence?field=${encodeURIComponent(fieldName)}`
+        : `${API_BASE}/documents/${docId}/layout-evidence`;
+      const res = await fetch(url, { headers: getHeaders() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data ?? json ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  // 13. Master-Data Verification
+  static async getMasterDataMatch(recordId: string): Promise<MasterDataMatch | null> {
+    try {
+      const res = await fetch(`${API_BASE}/records/${recordId}/master-data`, { headers: getHeaders() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data ?? json ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  // 14. Duplicate Detection
+  static async getDuplicateStatus(recordId: string): Promise<DuplicateCandidate | null> {
+    try {
+      const res = await fetch(`${API_BASE}/records/${recordId}/duplicates`, { headers: getHeaders() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data ?? json ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  // 15. Conflict / Anomaly Summary
+  static async getConflictSummary(recordId: string): Promise<ConflictSummary | null> {
+    try {
+      const res = await fetch(`${API_BASE}/records/${recordId}/conflicts`, { headers: getHeaders() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data ?? json ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  // 16. Record Risk
+  static async getRecordRisk(recordId: string): Promise<RecordRisk | null> {
+    try {
+      const res = await fetch(`${API_BASE}/records/${recordId}/risk`, { headers: getHeaders() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data ?? json ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  // 17. Review Routing
+  static async getReviewRouting(recordId: string): Promise<ReviewRouting | null> {
+    try {
+      const res = await fetch(`${API_BASE}/records/${recordId}/routing`, { headers: getHeaders() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data ?? json ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  // 18. Correction History
+  static async getCorrectionHistory(recordId: string): Promise<CorrectionHistoryEntry[]> {
+    try {
+      const res = await fetch(`${API_BASE}/records/${recordId}/corrections`, { headers: getHeaders() });
+      if (!res.ok) return [];
+      const json = await res.json();
+      return json.items ?? json.data ?? [];
+    } catch {
+      return [];
+    }
+  }
+
+  // 19. Submit Correction Feedback
+  static async submitCorrectionFeedback(recordId: string, feedback: CorrectionFeedback): Promise<boolean> {
+    try {
+      const res = await fetch(`${API_BASE}/records/${recordId}/corrections`, {
+        method: 'POST',
+        headers: getHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(feedback),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  // 20. GIS Linkage for Record
+  static async getGisLinkage(recordId: string): Promise<GisLinkageInfo | null> {
+    try {
+      const res = await fetch(`${API_BASE}/records/${recordId}/gis-linkage`, { headers: getHeaders() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data ?? json ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  // 21. Integration Status
+  static async getIntegrationStatus(): Promise<IntegrationStatus[]> {
+    try {
+      const res = await fetch(`${API_BASE}/integrations/status`, { headers: getHeaders() });
+      if (!res.ok) return [];
+      const json = await res.json();
+      return json.items ?? json.data ?? [];
+    } catch {
+      return [];
+    }
+  }
+
+  // 22. Processing Statistics
+  static async getProcessingStats(): Promise<ProcessingStats | null> {
+    try {
+      const res = await fetch(`${API_BASE}/analytics/processing-stats`, { headers: getHeaders() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data ?? json ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  // 23. Language Performance
+  static async getLanguagePerformance(): Promise<LanguagePerformance | null> {
+    try {
+      const res = await fetch(`${API_BASE}/analytics/language-performance`, { headers: getHeaders() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data ?? json ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  // 24. Document Type Performance
+  static async getDocumentTypePerformance(): Promise<DocumentTypePerformance | null> {
+    try {
+      const res = await fetch(`${API_BASE}/analytics/document-type-performance`, { headers: getHeaders() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data ?? json ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  // 25. Regional Progress
+  static async getRegionalProgress(): Promise<RegionalProgress | null> {
+    try {
+      const res = await fetch(`${API_BASE}/analytics/regional-progress`, { headers: getHeaders() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data ?? json ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  // 26. Human Review Queue Metrics
+  static async getHumanReviewQueueMetrics(): Promise<HumanReviewQueueMetrics | null> {
+    try {
+      const res = await fetch(`${API_BASE}/analytics/review-queue`, { headers: getHeaders() });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data ?? json ?? null;
+    } catch {
+      return null;
+    }
+  }
 }
+

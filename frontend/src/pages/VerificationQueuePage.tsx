@@ -5,7 +5,8 @@ import { mockApi } from '../services/mockApi';
 import { LandRecord } from '../types';
 import { ConfidenceBadge, StatusBadge } from '../components/ui/Badge';
 import { LoadingState } from '../components/ui/FeedbackStates';
-import { CheckSquare, AlertTriangle, ArrowRight, Filter, Search, ShieldAlert, ShieldOff } from 'lucide-react';
+import { PageHeader } from '../components/ui/PageHeader';
+import { CheckSquare, AlertTriangle, ArrowRight, Search, ShieldAlert, ShieldOff } from 'lucide-react';
 
 export const VerificationQueuePage: React.FC = () => {
   const [queue, setQueue] = useState<LandRecord[]>([]);
@@ -50,11 +51,10 @@ export const VerificationQueuePage: React.FC = () => {
   if (forbidden) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center space-y-3">
-        <ShieldOff className="w-10 h-10 text-red-400" />
-        <h2 className="text-base font-bold text-slate-800">Access Restricted</h2>
+        <ShieldOff className="w-8 h-8 text-red-400" />
+        <h2 className="text-sm font-bold text-slate-800">Access Restricted</h2>
         <p className="text-xs text-slate-500 max-w-sm">
-          Your current role does not have permission to access the verification queue.
-          Please contact your system administrator if you believe this is an error.
+          Your role does not have permission to access the verification queue.
         </p>
       </div>
     );
@@ -62,10 +62,10 @@ export const VerificationQueuePage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center space-y-3">
-        <AlertTriangle className="w-8 h-8 text-amber-400" />
+      <div className="flex flex-col items-center justify-center py-20 text-center space-y-2">
+        <AlertTriangle className="w-7 h-7 text-amber-400" />
         <p className="text-sm font-semibold text-slate-700">{error}</p>
-        <button onClick={() => window.location.reload()} className="text-xs text-blue-600 underline">Retry</button>
+        <button onClick={() => window.location.reload()} className="text-xs text-[#0F766E] underline">Retry</button>
       </div>
     );
   }
@@ -73,51 +73,44 @@ export const VerificationQueuePage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center space-x-2">
-            <CheckSquare className="w-5 h-5 text-amber-600" />
-            <h1 className="text-xl font-black text-slate-900">Officer Verification Queue</h1>
+      <PageHeader
+        title="Verification Queue"
+        actions={
+          <div className="inline-flex items-center gap-1.5 bg-white border border-[#CBD5E1] px-2.5 py-1 rounded-[6px] text-xs font-semibold text-[#334155] shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#D97706]" />
+            <span>{queue.length} pending review</span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
-            Prioritized cases requiring human correction due to low AI confidence, format errors, or reference mismatches.
-          </p>
-        </div>
+        }
+      />
 
-        <div className="inline-flex items-center space-x-2 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-800">
-          <ShieldAlert className="w-4 h-4 text-amber-600" />
-          <span>{queue.length} Cases Requiring Officer Review</span>
-        </div>
-      </div>
-
-      {/* Filter / Search */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between">
+      {/* Search bar — flat, no card wrapper */}
+      <div className="flex items-center justify-between">
         <div className="relative w-full max-w-sm">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#475569] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search by owner, survey #, or village..."
+            placeholder="Search by owner, ID, or village"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-9 pr-3 py-1.5 text-xs border border-[#CBD5E1] rounded-[6px] focus:outline-hidden focus:ring-2 focus:ring-[#166534] focus:border-[#166534]"
           />
         </div>
-        <span className="text-xs text-slate-500 hidden sm:inline">Priority sorted by lowest confidence</span>
+        <span className="text-xs text-slate-500 hidden sm:inline ml-4">Sorted by lowest confidence</span>
       </div>
 
       {/* Queue Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white rounded-lg border border-[#E2E8F0] shadow-[0_1px_2px_rgba(0,0,0,0.04)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-500 border-b border-slate-200 uppercase font-semibold">
+            <thead className="bg-white text-slate-500 border-b border-[#E2E8F0]">
               <tr>
-                <th className="px-4 py-3">Priority</th>
-                <th className="px-4 py-3">Record ID</th>
-                <th className="px-4 py-3">Landowner</th>
-                <th className="px-4 py-3">Location & Parcel</th>
-                <th className="px-4 py-3">AI Confidence</th>
-                <th className="px-4 py-3">Validation Warning</th>
-                <th className="px-4 py-3 text-right">Action</th>
+                <th className="px-4 py-3 font-semibold text-[10px]">#</th>
+                <th className="px-4 py-3 font-semibold text-[10px]">Record ID</th>
+                <th className="px-4 py-3 font-semibold text-[10px]">Landowner</th>
+                <th className="px-4 py-3 font-semibold text-[10px]">Location & parcel</th>
+                <th className="px-4 py-3 font-semibold text-[10px]">Confidence</th>
+                <th className="px-4 py-3 font-semibold text-[10px]">Validation warning</th>
+                <th className="px-4 py-3 text-right font-semibold text-[10px]">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -125,30 +118,32 @@ export const VerificationQueuePage: React.FC = () => {
                 <tr>
                   <td colSpan={7} className="px-4 py-12 text-center text-xs text-slate-400">
                     {queue.length === 0
-                      ? 'No records currently require verification. All records have been processed.'
+                      ? 'No records currently require verification.'
                       : 'No records match your search.'}
                   </td>
                 </tr>
               ) : filteredItems.map((item, idx) => (
-                <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-3">
-                    <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-100 text-amber-800">
-                      P{idx + 1} High
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 font-bold text-emerald-900">{item.displayId}</td>
+                <tr key={item.id} className="hover:bg-[#F8FAF8] transition-colors h-[52px]">
+                  <td className="px-4 py-3 text-slate-400 font-medium tabular-nums">{idx + 1}</td>
+                  <td className="px-4 py-3 font-semibold text-[#0B1F33] tabular-nums">{item.displayId}</td>
                   <td className="px-4 py-3 font-medium text-slate-900">{item.ownerName}</td>
-                  <td className="px-4 py-3 text-slate-600">
-                    {item.village}, {item.tehsil} (Surv: {item.surveyNumber})
+                  <td className="px-4 py-3 text-slate-500">
+                    {item.village}, {item.tehsil} · Surv {item.surveyNumber}
                   </td>
                   <td className="px-4 py-3">
-                    <ConfidenceBadge confidence={item.overallConfidence} />
+                    <span className="inline-flex items-center gap-1.5 text-xs">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#DC2626]" />
+                      <span className="tabular-nums font-semibold text-[#0F172A]">{item.overallConfidence}%</span>
+                      <span className="text-[#475569]">· Review</span>
+                    </span>
                   </td>
                   <td className="px-4 py-3">
                     {item.validationIssues.length > 0 ? (
-                      <div className="flex items-center text-amber-700 font-medium">
-                        <AlertTriangle className="w-3.5 h-3.5 mr-1 text-amber-500 shrink-0" />
-                        <span className="truncate max-w-xs">{item.validationIssues[0].message}</span>
+                      <div className="flex items-center text-xs text-[#0F172A]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#D97706] mr-1.5 shrink-0" />
+                        <span className="truncate max-w-xs" title={item.validationIssues[0].message}>
+                          {item.validationIssues[0].message}
+                        </span>
                       </div>
                     ) : (
                       <span className="text-slate-400">—</span>
@@ -157,10 +152,9 @@ export const VerificationQueuePage: React.FC = () => {
                   <td className="px-4 py-3 text-right">
                     <Link
                       to={`/verification/${item.id}`}
-                      className="inline-flex items-center px-3 py-1.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded text-xs font-bold transition shadow-xs"
+                      className="inline-flex items-center px-2.5 py-1 bg-[#166534] hover:bg-[#14532D] text-white rounded-[6px] text-xs font-semibold transition"
                     >
-                      <span>Review</span>
-                      <ArrowRight className="w-3 h-3 ml-1" />
+                      Review
                     </Link>
                   </td>
                 </tr>

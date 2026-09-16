@@ -7,20 +7,17 @@ import {
   FileText, 
   Clock, 
   CheckCircle2, 
-  MapPin, 
   UploadCloud, 
   ArrowRight, 
   AlertTriangle, 
   ShieldAlert, 
-  FileCheck2, 
-  UserCheck, 
   Send,
   Upload,
   Eye,
   RotateCcw
 } from 'lucide-react';
 
-type TabType = 'ALL' | 'PROCESSING' | 'ACCEPTED' | 'REJECTED' | 'GRIEVANCED' | 'REAPPLIED';
+type TabType = 'ALL' | 'PROCESSING' | 'ACCEPTED' | 'REJECTED' | 'REAPPLIED';
 
 interface CitizenSubmission {
   id: string;
@@ -84,7 +81,7 @@ export const CitizenDashboardPage: React.FC = () => {
       status: 'ACCEPTED',
       simpleStatus: 'Accepted & Certified',
       latestAction: 'Digitized, cross-verified with Sub-Registrar records & approved',
-      nextAction: 'None • Certified Digital Record available for download'
+      nextAction: 'Certified Digital Record available for download'
     },
     {
       id: 'CSUB-2026-003',
@@ -141,293 +138,325 @@ export const CitizenDashboardPage: React.FC = () => {
     if (activeTab === 'PROCESSING') return sub.status === 'PROCESSING' || sub.status === 'UNDER_VERIFICATION';
     if (activeTab === 'ACCEPTED') return sub.status === 'ACCEPTED';
     if (activeTab === 'REJECTED') return sub.status === 'REJECTED';
-    if (activeTab === 'GRIEVANCED') return sub.status === 'GRIEVANCE_SUBMITTED';
-    if (activeTab === 'REAPPLIED') return sub.status === 'REAPPLIED';
+    if (activeTab === 'REAPPLIED') return sub.status === 'REAPPLIED' || sub.status === 'GRIEVANCE_SUBMITTED';
     return true;
   });
 
+  const tabDefs: { id: TabType; label: string; count: number }[] = [
+    { id: 'ALL', label: 'All Submissions', count: submissions.length },
+    { 
+      id: 'PROCESSING', 
+      label: 'Under Review', 
+      count: submissions.filter(s => s.status === 'PROCESSING' || s.status === 'UNDER_VERIFICATION').length 
+    },
+    { 
+      id: 'ACCEPTED', 
+      label: 'Accepted', 
+      count: submissions.filter(s => s.status === 'ACCEPTED').length 
+    },
+    { 
+      id: 'REJECTED', 
+      label: 'Action Required / Rejected', 
+      count: submissions.filter(s => s.status === 'REJECTED').length 
+    },
+    { 
+      id: 'REAPPLIED', 
+      label: 'Reapplied / Grievances', 
+      count: submissions.filter(s => s.status === 'REAPPLIED' || s.status === 'GRIEVANCE_SUBMITTED').length 
+    },
+  ];
+
+  // Outline / subtle-tint status badges (6px radius, ~8% bg tint, ~30% border, accent text)
   const getStatusBadge = (status: CitizenSubmission['status'], label: string) => {
     switch (status) {
       case 'ACCEPTED':
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center space-x-1"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 mr-1" />{label}</span>;
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-[6px] bg-[#15803D]/[0.08] border border-[#15803D]/30 text-[#15803D]">
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#15803D] shrink-0" aria-hidden="true" />
+            <span>{label}</span>
+          </span>
+        );
       case 'UNDER_VERIFICATION':
       case 'PROCESSING':
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-amber-100 text-amber-900 border border-amber-300 flex items-center space-x-1"><Clock className="w-3.5 h-3.5 text-amber-700 mr-1" />{label}</span>;
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-[6px] bg-[#A16207]/[0.08] border border-[#A16207]/30 text-[#A16207]">
+            <Clock className="w-3.5 h-3.5 text-[#A16207] shrink-0" aria-hidden="true" />
+            <span>{label}</span>
+          </span>
+        );
       case 'REJECTED':
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-rose-100 text-rose-900 border border-rose-300 flex items-center space-x-1"><AlertTriangle className="w-3.5 h-3.5 text-rose-700 mr-1" />{label}</span>;
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-[6px] bg-[#B91C1C]/[0.08] border border-[#B91C1C]/30 text-[#B91C1C]">
+            <AlertTriangle className="w-3.5 h-3.5 text-[#B91C1C] shrink-0" aria-hidden="true" />
+            <span>{label}</span>
+          </span>
+        );
       case 'GRIEVANCE_SUBMITTED':
       case 'REAPPLIED':
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-purple-100 text-purple-900 border border-purple-300 flex items-center space-x-1"><RotateCcw className="w-3.5 h-3.5 text-purple-700 mr-1" />{label}</span>;
       default:
-        return <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-slate-100 text-slate-800">{label}</span>;
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-[6px] bg-[#334155]/[0.08] border border-[#334155]/30 text-[#334155]">
+            <RotateCcw className="w-3.5 h-3.5 text-[#334155] shrink-0" aria-hidden="true" />
+            <span>{label}</span>
+          </span>
+        );
     }
   };
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Citizen Welcome Card */}
-      <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-xl font-bold text-slate-900">{t('citizenPortalTitle')}</h1>
-            <span className="px-2 py-0.5 text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 rounded">
-              Verified Citizen Profile
-            </span>
-          </div>
-          <p className="text-xs text-slate-600 mt-1">
-            Welcome, <span className="font-bold text-slate-800">{currentUser?.name}</span>. Track your submitted land records, inspect certified parcels, or file grievances.
-          </p>
-
-          {/* Privacy isolation info pill */}
-          <div className="mt-3 inline-flex items-center space-x-3 text-[11px] text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-            <span><strong>Aadhaar ID:</strong> {currentUser?.aadhaarMasked || 'XXXX-XXXX-4892'}</span>
-            <span>•</span>
-            <span><strong>Registered Mobile:</strong> {currentUser?.mobile || '+91 98220 12345'}</span>
-          </div>
+      {/* Citizen Page Header: H1 on one line, Submit Document right-aligned */}
+      <div className="border-b border-slate-200 pb-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">
+            Citizen Dashboard
+          </h1>
+          <Link
+            to="/documents/upload"
+            className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-[#166534] hover:bg-[#14532D] text-white rounded-[6px] text-xs font-semibold transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#15803D] focus-visible:ring-offset-1 shrink-0 self-start sm:self-auto cursor-pointer"
+          >
+            <UploadCloud className="w-4 h-4" />
+            <span>Submit Document</span>
+          </Link>
         </div>
 
-        <Link
-          to="/documents/upload"
-          className="px-5 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-bold shadow-sm flex items-center space-x-2 shrink-0 transition cursor-pointer"
-        >
-          <UploadCloud className="w-4 h-4" />
-          <span>Submit Document for Digitization</span>
-        </Link>
+        {/* Compact, plain labeled metadata strip */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 pt-2.5">
+          <span>
+            <span className="text-slate-400">Citizen:</span>{' '}
+            <strong className="font-medium text-slate-800">{currentUser?.name || 'Rajesh Bharat Patil'}</strong>
+          </span>
+          <span className="text-slate-300 hidden sm:inline" aria-hidden="true">•</span>
+          <span className="text-slate-700 font-medium">Verified Citizen</span>
+        </div>
       </div>
 
-      {/* Success Notification Alert */}
+      {/* Success Notification Alert (Left border only, white surface) */}
       {grievanceSuccessMessage && (
-        <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-xl flex items-center space-x-3 text-xs text-emerald-900 animate-fadeIn">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+        <div className="p-3 bg-white border border-slate-200 border-l-4 border-l-[#15803D] rounded-[6px] flex items-center space-x-2.5 text-xs text-slate-800 animate-fadeIn">
+          <CheckCircle2 className="w-4 h-4 text-[#15803D] shrink-0" aria-hidden="true" />
           <div>
-            <span className="font-bold">Grievance & Reapplication Registered:</span>
-            <p className="text-[11px] text-emerald-800 mt-0.5">{grievanceSuccessMessage}</p>
+            <span className="font-semibold text-[#15803D]">Grievance & Reapplication Registered:</span>
+            <span className="ml-1 text-slate-700">{grievanceSuccessMessage}</span>
           </div>
         </div>
       )}
 
-
-      {/* Filter Tabs & Submissions History */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-        {/* Header with Title & Status Tabs */}
+      {/* Filter Tabs & Submissions Section */}
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+        {/* Header with Title, Result Count & Segmented Tablist */}
         <div className="p-4 border-b border-slate-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+          <div className="flex items-center justify-between pb-3">
             <div className="flex items-center space-x-2">
-              <FileText className="w-4 h-4 text-emerald-800" />
-              <h2 className="text-sm font-bold text-slate-900">{t('myRequests')}</h2>
+              <FileText className="w-4 h-4 text-slate-700" />
+              <h2 className="text-sm font-semibold text-slate-900">{t('myRequests')}</h2>
             </div>
-            <span className="text-xs text-slate-500 font-medium">
-              Showing {filteredSubmissions.length} of {submissions.length} Submissions
+            <span className="text-xs text-slate-500 tabular-nums">
+              {filteredSubmissions.length} of {submissions.length} records
             </span>
           </div>
 
-          {/* Navigation Tabs */}
-          <div className="flex flex-wrap gap-1.5 border-b border-slate-100 pb-1">
-            {[
-              { id: 'ALL', label: 'All Submissions' },
-              { id: 'PROCESSING', label: 'Under Review' },
-              { id: 'ACCEPTED', label: 'Accepted' },
-              { id: 'REJECTED', label: 'Action Required / Rejected' },
-              { id: 'REAPPLIED', label: 'Reapplied / Grievances' },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as TabType)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                  activeTab === tab.id
-                    ? 'bg-emerald-800 text-white shadow-2xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+          {/* Underline tab control with counts */}
+          <div 
+            role="tablist"
+            aria-label="Filter submissions by status"
+            className="flex items-center space-x-6 border-b border-slate-100 overflow-x-auto pt-1"
+          >
+            {tabDefs.map(tab => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  role="tab"
+                  id={`tab-${tab.id}`}
+                  aria-selected={isActive}
+                  aria-controls="submissions-list"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`pb-2.5 text-xs border-b-2 whitespace-nowrap transition-colors flex items-center space-x-1.5 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#15803D] focus-visible:ring-offset-1 cursor-pointer ${
+                    isActive
+                      ? 'border-[#166534] text-[#166534] font-semibold'
+                      : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300 font-medium'
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  <span className={`text-[11px] tabular-nums ${isActive ? 'text-[#166534] font-semibold' : 'text-slate-400'}`}>
+                    ({tab.count})
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Submissions List */}
-        <div className="divide-y divide-slate-100">
+        <div id="submissions-list" role="tabpanel" aria-labelledby={`tab-${activeTab}`} className="divide-y divide-slate-100">
           {filteredSubmissions.length === 0 ? (
             <div className="p-8 text-center text-xs text-slate-500">
               No submissions found under this status filter.
             </div>
           ) : (
             filteredSubmissions.map(sub => (
-              <div key={sub.id} className="p-5 hover:bg-slate-50/70 transition space-y-3">
+              <div 
+                key={sub.id} 
+                className="p-4 hover:bg-slate-50/70 transition-colors space-y-2.5"
+              >
+                {/* Row 1: Left: Reference ID & submitted date; Right: Single status badge + action buttons */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex items-center space-x-2">
-                    <span className="font-mono font-bold text-xs text-emerald-950">{sub.id}</span>
-                    <span className="text-slate-300">•</span>
-                    <span className="text-xs text-slate-500">{sub.submittedDate}</span>
-                  </div>
-                  {getStatusBadge(sub.status, sub.simpleStatus)}
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900">{sub.title}</h3>
-                  <p className="text-xs text-slate-600 mt-0.5">
-                    Survey No: <strong className="text-slate-800">{sub.surveyNumber}</strong> • Location: {sub.village}, {sub.taluka} Taluka, {sub.district} District
-                  </p>
-                </div>
-
-                {/* Status Timeline / Workflow Step */}
-                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs space-y-1">
-                  <div className="flex items-start space-x-2">
-                    <span className="font-bold text-slate-700 shrink-0">Latest Progress:</span>
-                    <span className="text-slate-600">{sub.latestAction}</span>
-                  </div>
-                  <div className="flex items-start space-x-2">
-                    <span className="font-bold text-emerald-900 shrink-0">Next Step:</span>
-                    <span className="text-emerald-800 font-medium">{sub.nextAction}</span>
+                    <span className="font-mono text-xs font-bold text-slate-900 tabular-nums">
+                      {sub.id}
+                    </span>
+                    <span className="text-slate-300" aria-hidden="true">•</span>
+                    <span className="text-xs text-slate-500 tabular-nums">
+                      Submitted: {sub.submittedDate}
+                    </span>
                   </div>
 
-                  {/* Rejection Reason display */}
-                  {sub.rejectionReason && (
-                    <div className="mt-2 pt-2 border-t border-slate-200 text-rose-900 bg-rose-50/60 p-2.5 rounded">
-                      <span className="font-bold block mb-0.5">Officer Review Notice / Reason for Rejection:</span>
-                      <p className="text-[11px] text-rose-800">{sub.rejectionReason}</p>
-                    </div>
-                  )}
+                  {/* Right: Exactly ONE right-aligned status badge, followed by actions */}
+                  <div className="flex items-center space-x-2.5 shrink-0">
+                    {getStatusBadge(sub.status, sub.simpleStatus)}
 
-                  {/* Grievance Note display */}
-                  {sub.grievanceNote && (
-                    <div className="mt-2 pt-2 border-t border-slate-200 text-purple-900 bg-purple-50/60 p-2.5 rounded">
-                      <span className="font-bold block mb-0.5">Citizen Grievance & Supplementary Document:</span>
-                      <p className="text-[11px] text-purple-800">{sub.grievanceNote}</p>
-                      {sub.supportingDocName && (
-                        <div className="mt-1 text-[10px] font-bold text-purple-950 flex items-center space-x-1">
-                          <FileCheck2 className="w-3.5 h-3.5" />
-                          <span>Evidence Attached: {sub.supportingDocName}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Actions per submission */}
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-                  <div className="text-[11px] text-slate-400">
-                    Document Ref: {sub.documentId}
-                  </div>
-
-                  <div className="flex items-center space-x-2">
                     {sub.status === 'ACCEPTED' && sub.recordId && (
                       <Link
                         to={`/records/${sub.recordId}`}
-                        className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-xs font-bold flex items-center space-x-1 transition"
+                        className="inline-flex items-center space-x-1 px-2.5 py-1 bg-[#166534] hover:bg-[#14532D] text-white rounded-[6px] text-xs font-medium transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#15803D]"
                       >
-                        <Eye className="w-3.5 h-3.5" />
+                        <Eye className="w-3.5 h-3.5" aria-hidden="true" />
                         <span>View Official Record</span>
                       </Link>
                     )}
 
                     {sub.status === 'REJECTED' && (
                       <button
+                        type="button"
                         onClick={() => handleOpenGrievance(sub)}
-                        className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded text-xs font-bold flex items-center space-x-1.5 transition shadow-2xs cursor-pointer"
+                        className="inline-flex items-center space-x-1 px-2.5 py-1 bg-transparent hover:bg-[#A16207]/[0.08] text-[#A16207] border border-[#A16207] hover:border-[#854d0e] rounded-[6px] text-xs font-medium transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#A16207] cursor-pointer"
                       >
-                        <RotateCcw className="w-3.5 h-3.5 text-slate-900" />
+                        <RotateCcw className="w-3.5 h-3.5 text-[#A16207]" aria-hidden="true" />
                         <span>File Grievance & Reapply</span>
                       </button>
                     )}
+                  </div>
+                </div>
 
-                    {sub.status === 'REAPPLIED' && (
-                      <span className="text-[11px] font-semibold text-purple-900 bg-purple-50 px-2.5 py-1 rounded border border-purple-200 flex items-center space-x-1">
-                        <Clock className="w-3 h-3 text-purple-600" />
-                        <span>Pending Final Human Officer Review</span>
-                      </span>
-                    )}
+                {/* Row 2: Title and labeled metadata inline */}
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900">{sub.title}</h3>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600 mt-1">
+                    <span>
+                      <span className="text-slate-400">Survey No.:</span>{' '}
+                      <strong className="font-medium text-slate-800 tabular-nums">{sub.surveyNumber}</strong>
+                    </span>
+                    <span className="text-slate-300" aria-hidden="true">•</span>
+                    <span>
+                      <span className="text-slate-400">Location:</span>{' '}
+                      <span className="text-slate-700">{sub.village}, {sub.taluka}, {sub.district}</span>
+                    </span>
+                    <span className="text-slate-300" aria-hidden="true">•</span>
+                    <span>
+                      <span className="text-slate-400">Document Ref:</span>{' '}
+                      <span className="font-mono text-slate-600 tabular-nums">{sub.documentId}</span>
+                    </span>
+                  </div>
+                </div>
 
-                    {sub.status === 'UNDER_VERIFICATION' && (
-                      <span className="text-[11px] font-semibold text-amber-800 bg-amber-50 px-2.5 py-1 rounded border border-amber-200">
-                        In Verification Queue
+                {/* Row 3: Factual status stacked on two lines with small muted labels */}
+                <div className="pt-2 border-t border-slate-100 text-xs space-y-1.5">
+                  <div>
+                    <span className="text-[11px] font-medium text-slate-400 block">Current Stage</span>
+                    <span className="text-slate-700">{sub.latestAction}</span>
+                  </div>
+                  {sub.nextAction && sub.status !== 'ACCEPTED' && (
+                    <div>
+                      <span className="text-[11px] font-medium text-slate-400 block">Pending Action</span>
+                      <span className="text-slate-700">{sub.nextAction}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Rejection notice line: White surface, thin red left border (3-4px), muted red text */}
+                {sub.rejectionReason && sub.status === 'REJECTED' && (
+                  <div className="mt-2 p-2.5 bg-white border border-slate-200 border-l-4 border-l-[#B91C1C] rounded-[6px] text-xs text-slate-700">
+                    <span className="font-semibold text-[#B91C1C]">Rejection Notice:</span>{' '}
+                    <span>{sub.rejectionReason}</span>
+                  </div>
+                )}
+
+                {/* Grievance detail note line: White surface, thin slate left border */}
+                {sub.grievanceNote && (
+                  <div className="mt-2 p-2.5 bg-white border border-slate-200 border-l-4 border-l-[#334155] rounded-[6px] text-xs text-slate-700">
+                    <span className="font-semibold text-slate-800">Filed Grievance:</span>{' '}
+                    <span>{sub.grievanceNote}</span>
+                    {sub.supportingDocName && (
+                      <span className="block mt-1 font-mono text-[11px] text-slate-500">
+                        Attached Document: {sub.supportingDocName}
                       </span>
                     )}
                   </div>
-                </div>
+                )}
               </div>
             ))
           )}
         </div>
       </div>
 
-      {/* Citizen Helpful Links (Privacy Restricted GIS) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Footer: Small muted footnote and plain slate utility link */}
+      <div className="border-t border-slate-200 pt-3 pb-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-slate-400">
+        <span>Records verified under Maharashtra Land Revenue Code, 1966.</span>
         <Link
           to="/map"
-          className="p-5 bg-white rounded-xl border border-slate-200 shadow-2xs hover:border-emerald-500 transition flex items-start space-x-3 group"
+          className="text-slate-500 hover:text-slate-800 text-[11px] font-medium hover:underline"
         >
-          <div className="p-3 rounded-xl bg-emerald-100 text-emerald-800 group-hover:bg-emerald-800 group-hover:text-white transition">
-            <MapPin className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-xs font-bold text-slate-900 flex items-center">
-              <span>My Certified GIS Land Parcels</span>
-              <ArrowRight className="w-3.5 h-3.5 ml-1 text-emerald-700 group-hover:translate-x-1 transition-transform" />
-            </h3>
-            <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-              Visualize your approved survey parcels on the spatial map layer. Only your registered land coordinates are accessible.
-            </p>
-          </div>
+          View Registered Parcels on GIS Map
         </Link>
-
-        <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-2xs flex items-start space-x-3">
-          <div className="p-3 rounded-xl bg-emerald-100 text-emerald-800">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-xs font-bold text-slate-900">Government Provenance Guarantee</h3>
-            <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-              All digitized records are cross-checked against official revenue registers and digitally signed by authorized revenue officers.
-            </p>
-          </div>
-        </div>
       </div>
 
       {/* GRIEVANCE & REAPPLICATION MODAL */}
       {selectedForGrievance && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden animate-fadeIn">
-            <div className="bg-gradient-to-r from-amber-600 to-amber-700 text-white p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-xl max-w-lg w-full overflow-hidden animate-fadeIn">
+            {/* Header: Dark slate/navy */}
+            <div className="bg-[#0F172A] text-white p-4 sm:p-5">
               <div className="flex items-center space-x-2">
-                <RotateCcw className="w-6 h-6 text-amber-200" />
-                <h2 className="text-base font-black">File Citizen Grievance & Reapply</h2>
+                <RotateCcw className="w-4 h-4 text-slate-300" />
+                <h2 className="text-sm font-semibold">File Citizen Grievance & Reapply</h2>
               </div>
-              <p className="text-xs text-amber-100 mt-1">
-                Submission: <span className="font-mono font-bold">{selectedForGrievance.id}</span> (Survey {selectedForGrievance.surveyNumber}, {selectedForGrievance.village})
+              <p className="text-xs text-slate-300 mt-1">
+                Submission: <span className="font-mono font-bold text-white">{selectedForGrievance.id}</span> (Survey {selectedForGrievance.surveyNumber}, {selectedForGrievance.village})
               </p>
             </div>
 
-            <form onSubmit={handleSubmitGrievance} className="p-6 space-y-4 text-xs">
-              {/* Rejection Notice */}
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-950">
-                <span className="font-bold block mb-1">Reason for Initial Rejection:</span>
-                <p className="text-[11px] leading-relaxed text-rose-800">
+            <form onSubmit={handleSubmitGrievance} className="p-5 space-y-4 text-xs">
+              {/* Rejection Notice: White surface, thin red left border (3-4px), muted red text */}
+              <div className="p-3 bg-white border border-slate-200 border-l-4 border-l-[#B91C1C] rounded-[6px] text-xs">
+                <span className="font-semibold block mb-0.5 text-[#B91C1C]">Reason for Initial Rejection:</span>
+                <p className="text-[11px] leading-relaxed text-slate-700">
                   {selectedForGrievance.rejectionReason || 'Discrepancy identified in land area or ownership record against master register.'}
                 </p>
               </div>
 
               {/* Grievance Statement */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label htmlFor="grievance-explanation" className="block font-medium text-slate-700 mb-1">
                   Grievance Explanation / Justification
                 </label>
                 <textarea
+                  id="grievance-explanation"
                   required
                   rows={3}
                   value={grievanceText}
                   onChange={e => setGrievanceText(e.target.value)}
-                  placeholder="Explain why this decision should be reviewed (e.g., partition approved under Mutation 1422, attached registered sale deed proves 3.10 hectares)..."
-                  className="w-full p-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                  placeholder="Explain grounds for review (e.g., partition approved under Mutation 1422, registered sale deed confirms 3.10 hectares)..."
+                  className="w-full p-2 border border-slate-300 rounded-[6px] text-xs focus:ring-1 focus:ring-[#15803D] focus:outline-hidden"
                 />
               </div>
 
               {/* Supporting Evidence File Upload */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-medium text-slate-700 mb-1">
                   Upload Supplementary Supporting Document (PDF / JPG)
                 </label>
-                <div className="border-2 border-dashed border-slate-300 hover:border-emerald-600 rounded-xl p-4 text-center cursor-pointer bg-slate-50 transition">
+                <div className="border border-dashed border-slate-300 hover:border-[#15803D] rounded-[6px] p-3 text-center cursor-pointer bg-slate-50 transition">
                   <input
                     type="file"
                     accept=".pdf,.jpg,.jpeg,.png"
@@ -436,9 +465,9 @@ export const CitizenDashboardPage: React.FC = () => {
                     id="grievance-file"
                   />
                   <label htmlFor="grievance-file" className="cursor-pointer flex flex-col items-center">
-                    <Upload className="w-6 h-6 text-slate-400 mb-1" />
-                    <span className="font-semibold text-slate-700">
-                      {supportingFile ? supportingFile.name : 'Click to select supporting document'}
+                    <Upload className="w-5 h-5 text-slate-400 mb-1" />
+                    <span className="font-medium text-slate-700">
+                      {supportingFile ? supportingFile.name : 'Select supplementary document'}
                     </span>
                     <span className="text-[10px] text-slate-400 mt-0.5">
                       Accepted formats: PDF, JPG, PNG (Max 10 MB)
@@ -447,29 +476,29 @@ export const CitizenDashboardPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* MANDATORY HUMAN REVIEW WORKFLOW WARNING */}
-              <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl text-purple-950 text-[11px] leading-relaxed flex items-start space-x-2">
-                <ShieldAlert className="w-4 h-4 text-purple-700 shrink-0 mt-0.5" />
+              {/* Mandatory Human Review Notice: Left border only */}
+              <div className="p-3 bg-white border border-slate-200 border-l-4 border-l-slate-500 rounded-[6px] text-[11px] leading-relaxed flex items-start space-x-2 text-slate-700">
+                <ShieldAlert className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
                 <div>
-                  <strong>Mandatory Human Officer Review:</strong>
-                  <p className="mt-0.5 text-purple-800">
-                    Once reapplied, this submission <strong>CANNOT</strong> be approved by automated AI confidence rules. It will be routed directly to the Tehsildar & Verification Officer worklist for final manual decision.
+                  <strong className="text-slate-900">Mandatory Human Officer Review:</strong>
+                  <p className="mt-0.5 text-slate-600">
+                    Once reapplied, this submission cannot be auto-processed. It will be routed directly to the Tehsildar & Verification Officer worklist for manual review.
                   </p>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="pt-2 border-t border-slate-200 flex items-center justify-end space-x-3">
+              {/* Action Buttons: Secondary = slate outline, Primary = solid forest green */}
+              <div className="pt-2 border-t border-slate-200 flex items-center justify-end space-x-2.5">
                 <button
                   type="button"
                   onClick={() => setSelectedForGrievance(null)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                  className="px-3.5 py-1.5 text-xs font-medium bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-[6px] transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-bold shadow-md flex items-center space-x-1.5 transition cursor-pointer"
+                  className="px-4 py-1.5 bg-[#166534] hover:bg-[#14532D] text-white rounded-[6px] text-xs font-semibold shadow-xs flex items-center space-x-1.5 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#15803D] cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Submit Grievance & Reapply</span>
@@ -489,3 +518,4 @@ export const CitizenDashboardPage: React.FC = () => {
     </div>
   );
 };
+

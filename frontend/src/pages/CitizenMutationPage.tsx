@@ -4,18 +4,16 @@ import {
   FileSpreadsheet, 
   Clock, 
   CheckCircle2, 
-  AlertCircle, 
   MapPin, 
   Download, 
   Search, 
   ChevronRight, 
-  Calendar, 
   UserCheck, 
   Scale, 
-  ShieldCheck,
-  ExternalLink
+  ShieldCheck
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { PageHeader } from '../components/ui/PageHeader';
 
 interface MutationStep {
   id: number;
@@ -269,69 +267,45 @@ export const CitizenMutationPage: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-emerald-700/50">
-        <div className="relative z-10 max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-700/60 border border-emerald-500/30 text-emerald-100 text-xs font-semibold uppercase tracking-wider mb-3">
-            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-300" />
-            Statutory Land Records • e-Ferfar Tracker
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            Mutation & Process Lifecycle Status
-          </h1>
-          <p className="text-emerald-100/90 text-sm sm:text-base mt-2 leading-relaxed">
-            Track statutory legal land mutation entries (फेरफार नोंद), notice periods, Talathi field verifications, and final sanction orders in real time under the Maharashtra Land Revenue Code.
-          </p>
-        </div>
-        
-        {/* Decorative background circle */}
-        <div className="absolute right-0 top-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-      </div>
+      {/* Page Header */}
+      <PageHeader
+        title="Mutation (e-Ferfar) & Process Lifecycle"
+        description="Track mutation applications and their statutory stages."
+        icon={FileSpreadsheet}
+      />
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+        <div className="bg-white p-4 rounded-[8px] border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Applications</div>
+            <div className="text-xs font-semibold text-slate-500">Total Applications</div>
             <div className="text-2xl font-bold text-slate-900 mt-1">{mutations.length}</div>
-            <div className="text-xs text-emerald-700 font-medium mt-1">Recorded in your profile</div>
           </div>
-          <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-700 border border-emerald-100">
-            <FileSpreadsheet className="w-6 h-6" />
-          </div>
+          <FileSpreadsheet className="w-5 h-5 text-slate-500 flex-shrink-0" />
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+        <div className="bg-white p-4 rounded-[8px] border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Public Notice</div>
-            <div className="text-2xl font-bold text-amber-600 mt-1">1</div>
-            <div className="text-xs text-amber-700 font-medium mt-1">15-day statutory notice active</div>
+            <div className="text-xs font-semibold text-slate-500">Public Notices Active</div>
+            <div className="text-2xl font-bold text-[#A16207] mt-1">1</div>
           </div>
-          <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 border border-amber-100">
-            <Clock className="w-6 h-6" />
-          </div>
+          <Clock className="w-5 h-5 text-slate-500 flex-shrink-0" />
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+        <div className="bg-white p-4 rounded-[8px] border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Field Verification</div>
-            <div className="text-2xl font-bold text-blue-600 mt-1">1</div>
-            <div className="text-xs text-blue-700 font-medium mt-1">Panchnama pending</div>
+            <div className="text-xs font-semibold text-slate-500">Panchnama Pending</div>
+            <div className="text-2xl font-bold text-slate-900 mt-1">1</div>
           </div>
-          <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 border border-blue-100">
-            <UserCheck className="w-6 h-6" />
-          </div>
+          <UserCheck className="w-5 h-5 text-slate-500 flex-shrink-0" />
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+        <div className="bg-white p-4 rounded-[8px] border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Sanctioned & Certified</div>
-            <div className="text-2xl font-bold text-emerald-600 mt-1">1</div>
-            <div className="text-xs text-emerald-700 font-medium mt-1">Updated on 7/12 extract</div>
+            <div className="text-xs font-semibold text-slate-500">Sanctioned Entries</div>
+            <div className="text-2xl font-bold text-[#166534] mt-1">1</div>
           </div>
-          <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 border border-emerald-100">
-            <CheckCircle2 className="w-6 h-6" />
-          </div>
+          <CheckCircle2 className="w-5 h-5 text-slate-500 flex-shrink-0" />
         </div>
       </div>
 
@@ -339,7 +313,7 @@ export const CitizenMutationPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Applications List */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+          <div className="bg-white rounded-[8px] border border-slate-200 shadow-sm p-4">
             <div className="flex flex-col sm:flex-row gap-3 mb-4">
               <div className="relative flex-1">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -348,13 +322,13 @@ export const CitizenMutationPage: React.FC = () => {
                   placeholder="Search mutation or survey no..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600"
+                  className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#166534]/20 focus:border-[#166534]"
                 />
               </div>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="text-xs border border-slate-200 rounded-lg px-2.5 py-2 font-medium bg-slate-50 text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="text-xs border border-slate-200 rounded-[6px] px-2.5 py-2 font-medium bg-slate-50 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#166534]/20"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="UNDER_NOTICE">Public Notice Active</option>
@@ -370,9 +344,9 @@ export const CitizenMutationPage: React.FC = () => {
                   <div
                     key={mut.id}
                     onClick={() => setSelectedMutation(mut.id)}
-                    className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                    className={`p-4 rounded-[8px] border cursor-pointer transition-all ${
                       isSelected 
-                        ? 'border-emerald-600 bg-emerald-50/50 shadow-sm ring-1 ring-emerald-600' 
+                        ? 'border-slate-200 border-l-[3px] border-l-[#166534] bg-white shadow-sm' 
                         : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50'
                     }`}
                   >
@@ -381,16 +355,16 @@ export const CitizenMutationPage: React.FC = () => {
                         <div className="font-bold text-slate-900 text-sm leading-snug">
                           {mut.mutationNumber}
                         </div>
-                        <div className="text-xs font-semibold text-emerald-800 mt-0.5">
+                        <div className="text-xs font-semibold text-[#166534] mt-0.5">
                           {mut.type}
                         </div>
                       </div>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold border ${
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-[6px] text-[11px] font-semibold border ${
                         mut.currentStatus === 'SANCTIONED'
-                          ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                          ? 'border-[#15803D]/30 text-[#15803D] bg-transparent'
                           : mut.currentStatus === 'UNDER_NOTICE'
-                          ? 'bg-amber-100 text-amber-800 border-amber-200'
-                          : 'bg-blue-100 text-blue-800 border-blue-200'
+                          ? 'border-[#A16207]/30 text-[#A16207] bg-transparent'
+                          : 'border-[#334155]/30 text-[#334155] bg-transparent'
                       }`}>
                         {mut.currentStatus === 'SANCTIONED' ? 'Certified' : mut.currentStatus === 'UNDER_NOTICE' ? 'Notice Period' : 'Scrutiny'}
                       </span>
@@ -406,7 +380,7 @@ export const CitizenMutationPage: React.FC = () => {
                       <div>
                         <span className="text-slate-400">Applied:</span> {mut.submissionDate}
                       </div>
-                      <div className="flex items-center gap-1 text-emerald-700 font-medium justify-end">
+                      <div className="flex items-center gap-1 text-[#166534] font-semibold justify-end">
                         <span>Details</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </div>
@@ -424,38 +398,34 @@ export const CitizenMutationPage: React.FC = () => {
           </div>
 
           {/* Quick Notice Info Box */}
-          <div className="bg-emerald-50 rounded-xl border border-emerald-200 p-4 text-xs text-emerald-900">
-            <div className="font-bold flex items-center gap-1.5 mb-1.5 text-emerald-950">
-              <Scale className="w-4 h-4 text-emerald-700" />
-              Statutory Mutation Rules (Sec. 150 MLRC)
-            </div>
-            Under Maharashtra Land Revenue Code, once a mutation application is scrutinized, a mandatory 15-day notice is posted to allow any affected party or co-sharer to submit claims before final sanction.
+          <div className="bg-white rounded-[8px] border border-slate-200 p-4 text-xs text-slate-600">
+            Sec. 150 MLRC: 15-day public notice required before sanction.
           </div>
         </div>
 
         {/* Right Column: Detailed Lifecycle Tracker for Selected Mutation */}
         <div className="lg:col-span-7">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-[8px] border border-slate-200 shadow-sm overflow-hidden">
             {/* Header */}
             <div className="p-6 border-b border-slate-200 bg-slate-50/50">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Process Tracking ID: {activeItem.id}</span>
+                  <span className="text-xs font-semibold text-slate-500">Tracking ID: {activeItem.id}</span>
                   <h2 className="text-xl font-bold text-slate-900 mt-1">{activeItem.mutationNumber}</h2>
-                  <div className="text-sm font-medium text-emerald-700 mt-0.5">{activeItem.type}</div>
+                  <div className="text-sm font-semibold text-[#166534] mt-0.5">{activeItem.type}</div>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={() => alert(`Downloading statutory notice copy for ${activeItem.mutationNumber}...`)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition-colors"
                   >
                     <Download className="w-3.5 h-3.5 text-slate-500" />
                     Notice PDF
                   </button>
                   <Link
                     to="/map"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-semibold shadow-sm transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] bg-[#166534] hover:bg-[#14532D] text-white text-xs font-semibold shadow-sm transition-colors"
                   >
                     <MapPin className="w-3.5 h-3.5" />
                     View on Map
@@ -464,47 +434,47 @@ export const CitizenMutationPage: React.FC = () => {
               </div>
 
               {/* Status Banner */}
-              <div className={`mt-4 p-3.5 rounded-lg border flex items-center justify-between gap-3 ${
+              <div className={`mt-4 p-3.5 rounded-[6px] border border-slate-200 bg-white flex items-center justify-between gap-3 ${
                 activeItem.currentStatus === 'SANCTIONED'
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                  ? 'border-l-[4px] border-l-[#15803D]'
                   : activeItem.currentStatus === 'UNDER_NOTICE'
-                  ? 'bg-amber-50 border-amber-200 text-amber-900'
-                  : 'bg-blue-50 border-blue-200 text-blue-900'
+                  ? 'border-l-[4px] border-l-[#A16207]'
+                  : 'border-l-[4px] border-l-[#334155]'
               }`}>
                 <div className="flex items-center gap-2.5">
                   {activeItem.currentStatus === 'SANCTIONED' ? (
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                    <CheckCircle2 className="w-5 h-5 text-[#15803D] flex-shrink-0" />
                   ) : (
-                    <Clock className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                    <Clock className="w-5 h-5 text-[#A16207] flex-shrink-0" />
                   )}
                   <div>
-                    <div className="text-xs font-bold uppercase tracking-wider">Current Stage Status</div>
-                    <div className="text-sm font-semibold">{activeItem.currentStatusLabel} ({activeItem.currentStatusMarathi})</div>
+                    <div className="text-[11px] font-semibold text-slate-500">Current Stage</div>
+                    <div className="text-sm font-semibold text-slate-900">{activeItem.currentStatusLabel} ({activeItem.currentStatusMarathi})</div>
                   </div>
                 </div>
                 {activeItem.noticeExpiryDate && (
                   <div className="text-right text-xs">
                     <div className="text-slate-500 font-medium">Notice Window Closes:</div>
-                    <div className="font-bold text-slate-900">{activeItem.noticeExpiryDate}</div>
+                    <div className="font-bold text-[#0F172A]">{activeItem.noticeExpiryDate}</div>
                   </div>
                 )}
               </div>
 
               {/* Metadata Grid */}
               <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                <div className="bg-white p-2.5 rounded-lg border border-slate-200">
+                <div className="bg-white p-2.5 rounded-[6px] border border-slate-200">
                   <div className="text-slate-500 font-medium">Land Parcel</div>
                   <div className="font-bold text-slate-900 mt-0.5">Survey {activeItem.surveyNumber}</div>
                 </div>
-                <div className="bg-white p-2.5 rounded-lg border border-slate-200">
+                <div className="bg-white p-2.5 rounded-[6px] border border-slate-200">
                   <div className="text-slate-500 font-medium">Jurisdiction</div>
                   <div className="font-bold text-slate-900 mt-0.5">{activeItem.village}, {activeItem.taluka}</div>
                 </div>
-                <div className="bg-white p-2.5 rounded-lg border border-slate-200">
+                <div className="bg-white p-2.5 rounded-[6px] border border-slate-200">
                   <div className="text-slate-500 font-medium">Application Date</div>
                   <div className="font-bold text-slate-900 mt-0.5">{activeItem.submissionDate}</div>
                 </div>
-                <div className="bg-white p-2.5 rounded-lg border border-slate-200">
+                <div className="bg-white p-2.5 rounded-[6px] border border-slate-200">
                   <div className="text-slate-500 font-medium">Est. Completion</div>
                   <div className="font-bold text-slate-900 mt-0.5">{activeItem.expectedCompletionDate}</div>
                 </div>
@@ -515,7 +485,6 @@ export const CitizenMutationPage: React.FC = () => {
             <div className="p-6">
               <div className="text-sm font-bold text-slate-900 mb-6 flex items-center justify-between">
                 <span>Revenue Lifecycle Stages & Milestones</span>
-                <span className="text-xs font-semibold text-slate-500">6 Stages Required for Certification</span>
               </div>
 
               <div className="relative pl-6 space-y-8 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
@@ -526,12 +495,12 @@ export const CitizenMutationPage: React.FC = () => {
                   return (
                     <div key={step.id} className="relative">
                       {/* Node circle */}
-                      <div className={`absolute -left-6 top-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${
+                      <div className={`absolute -left-6 top-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                         isDone 
-                          ? 'bg-emerald-600 border-emerald-600 text-white' 
+                          ? 'bg-[#166534] text-white border border-[#166534]' 
                           : isInProgress 
-                          ? 'bg-amber-500 border-amber-500 text-white ring-4 ring-amber-100 animate-pulse'
-                          : 'bg-white border-slate-300 text-slate-400'
+                          ? 'bg-white border-2 border-[#A16207] text-[#A16207] ring-2 ring-[#A16207]/20'
+                          : 'bg-white border border-slate-300 text-slate-400'
                       }`}>
                         {isDone ? '✓' : step.id}
                       </div>
@@ -539,25 +508,21 @@ export const CitizenMutationPage: React.FC = () => {
                       <div className="pl-4">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <h4 className={`text-sm font-bold ${
-                            isDone ? 'text-slate-900' : isInProgress ? 'text-amber-900' : 'text-slate-500'
+                            isDone ? 'text-slate-900' : isInProgress ? 'text-[#A16207]' : 'text-slate-500'
                           }`}>
                             {step.label}
                           </h4>
                           {step.completedDate && (
-                            <span className={`text-xs px-2 py-0.5 rounded font-medium ${
-                              isDone ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800 font-semibold'
+                            <span className={`text-xs px-2 py-0.5 rounded-[6px] border font-medium ${
+                              isDone ? 'border-[#15803D]/30 text-[#15803D] bg-transparent' : 'border-[#A16207]/30 text-[#A16207] bg-transparent font-semibold'
                             }`}>
                               {step.completedDate}
                             </span>
                           )}
                         </div>
 
-                        <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                          {step.description}
-                        </p>
-
                         {step.actor && (
-                          <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                          <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-[4px]">
                             <span className="font-semibold text-slate-700">Authority:</span>
                             <span>{step.actor}</span>
                           </div>
@@ -570,10 +535,9 @@ export const CitizenMutationPage: React.FC = () => {
 
               {/* Remarks / Action Notes */}
               {activeItem.notes && (
-                <div className="mt-8 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700">
-                  <div className="font-bold text-slate-900 mb-1 flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-emerald-700" />
-                    Official Revenue Remark
+                <div className="mt-8 p-4 rounded-[8px] bg-white border border-slate-200 text-xs text-slate-700">
+                  <div className="font-bold text-slate-900 mb-1">
+                    Remarks
                   </div>
                   {activeItem.notes}
                 </div>
@@ -585,3 +549,4 @@ export const CitizenMutationPage: React.FC = () => {
     </div>
   );
 };
+

@@ -5,11 +5,11 @@ import { Sidebar } from './Sidebar';
 
 export const AppLayout: React.FC = () => {
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col antialiased">
+    <div className="min-h-screen bg-[#F6F8FA] text-slate-800 flex flex-col antialiased">
       <Navbar />
-      <div className="flex flex-1">
+      <div className="flex flex-1 min-h-[calc(100vh-4rem)]">
         <Sidebar />
-        <main className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full overflow-y-auto">
+        <main className="flex-1 p-5 md:p-7 max-w-7xl mx-auto w-full overflow-y-auto">
           <Outlet />
         </main>
       </div>

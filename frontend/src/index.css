@@ -30,24 +30,88 @@
 }
 
 /* ==========================================================================
+   App Shell — Government Design System tokens & utilities
+   ========================================================================== */
+
+:root {
+  --navy-700: #0B1F33;
+  --navy-600: #16324F;
+  --teal-700:  #0F766E;
+  --gov-700:   #15803D;
+  --amber-700: #B7791F;
+  --surface:   #FFFFFF;
+  --bg:        #F6F8FA;
+  --border:    #D9E0E7;
+  --text:      #17202A;
+  --text-muted:#5B6573;
+}
+
+/* App background */
+.app-bg {
+  background-color: var(--bg);
+}
+
+/* Compact section label */
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Teal primary button */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  background-color: var(--teal-700);
+  color: #ffffff;
+  border-radius: 4px;
+  transition: background-color 0.15s;
+  cursor: pointer;
+}
+.btn-primary:hover { background-color: #0d6460; }
+
+/* Secondary ghost button */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  background-color: #ffffff;
+  color: #374151;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  transition: background-color 0.15s;
+  cursor: pointer;
+}
+.btn-secondary:hover { background-color: #F6F8FA; }
+
+/* ==========================================================================
    Hero Section Animations: Ken Burns, GIS Scanning, Beacons & Text Sequence
    ========================================================================== */
 
 /* 1. Cinematic Zoom: Continuous, very slow cinematic zoom-in/out and drift */
 @keyframes cinematicZoomDrift {
   0% {
-    transform: scale(1.08) translate3d(0%, 0%, 0);
+    transform: scale(1.05) translate3d(0%, 0%, 0);
   }
   50% {
-    transform: scale(1.18) translate3d(-1%, -0.6%, 0);
+    transform: scale(1.22) translate3d(-1.4%, -0.85%, 0);
   }
   100% {
-    transform: scale(1.08) translate3d(0%, 0%, 0);
+    transform: scale(1.05) translate3d(0%, 0%, 0);
   }
 }
 
 .animate-cinematic-zoom {
-  animation: cinematicZoomDrift 28s ease-in-out infinite alternate;
+  animation: cinematicZoomDrift 14s cubic-bezier(0.22, 0.61, 0.36, 1) infinite alternate;
   will-change: transform;
 }
 

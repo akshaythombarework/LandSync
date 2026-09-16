@@ -8,12 +8,9 @@ import {
   CreditCard, 
   CheckCircle2, 
   Save, 
-  Lock, 
-  FileText, 
-  Languages,
-  Calendar,
-  AlertCircle
+  Lock
 } from 'lucide-react';
+import { PageHeader } from '../components/ui/PageHeader';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -51,133 +48,128 @@ export const CitizenAccountPage: React.FC = () => {
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
       {/* Page Header */}
-      <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-slate-900">Account & Profile Information</h1>
-            <span className="px-2.5 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-full flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-              UIDAI e-KYC Verified
-            </span>
-          </div>
-          <p className="text-xs text-slate-600 mt-1">
-            Manage your registered citizen profile, authenticated contact information, and postal address for legal land notices.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="text-right text-xs">
-            <div className="text-slate-400">Citizen ID</div>
-            <div className="font-mono font-bold text-slate-800">{currentUser?.id || 'usr-citizen-1'}</div>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        category="Citizen Services"
+        title="Citizen Account & KYC Profile"
+        description="Your registered identity, contact, and postal details."
+        icon={User}
+        badge={
+          <span className="px-2 py-0.5 text-[11px] font-bold border border-[#15803D]/30 text-[#15803D] bg-transparent rounded-[6px] uppercase tracking-wider inline-flex items-center gap-1">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#15803D]" />
+            UIDAI e-KYC Verified
+          </span>
+        }
+      />
 
       {saveSuccess && (
-        <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-xl flex items-center gap-3 text-emerald-900 text-sm font-medium animate-fadeIn shadow-sm">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+        <div className="p-4 bg-white border border-slate-200 border-l-[3px] border-l-[#15803D] rounded-[8px] flex items-center gap-3 text-slate-900 text-sm font-medium animate-fadeIn shadow-sm">
+          <CheckCircle2 className="w-5 h-5 text-[#15803D] flex-shrink-0" />
           <div>
-            <div className="font-bold">Profile Updated Successfully</div>
-            <div className="text-xs text-emerald-700 mt-0.5">Your official citizen profile and contact records have been updated in the state registry.</div>
+            <div className="font-bold text-slate-900">Profile Updated Successfully</div>
+            <div className="text-xs text-slate-600 mt-0.5">Your official citizen profile and contact records have been updated in the state registry.</div>
           </div>
         </div>
       )}
 
       {/* Main Profile Form */}
       <form onSubmit={handleSave} className="space-y-6">
-        {/* UIDAI Identity Verification Section */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        {/* Official Government Identity (Aadhaar / e-KYC) */}
+        <div className="bg-white rounded-[8px] border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-emerald-700" />
-              <h2 className="text-sm font-bold text-slate-900">Official Government Identity (Aadhaar / e-KYC)</h2>
+              <CreditCard className="w-4 h-4 text-[#15803D]" />
+              <h2 className="text-sm font-bold text-slate-900">Official government identity (Aadhaar / e-KYC)</h2>
             </div>
-            <span className="text-[11px] font-medium text-slate-500 bg-slate-200/60 px-2 py-0.5 rounded">
-              Immutable KYC Fields
+            <span className="text-xs text-slate-500">
+              Verified — cannot be edited
             </span>
           </div>
 
-          <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-6 bg-slate-50/30">
+          <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
-                Masked Aadhaar Number
+              <label className="block text-xs font-medium text-slate-500 mb-1">
+                Citizen ID
               </label>
-              <div className="flex items-center gap-2 p-2.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-800 font-mono text-sm">
+              <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-[6px] font-mono font-semibold text-slate-800 text-sm">
+                {currentUser?.id || 'usr-citizen-1'}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1">
+                Aadhaar number
+              </label>
+              <div className="flex items-center gap-2 p-2.5 bg-slate-50 border border-slate-200 rounded-[6px] text-slate-800 font-mono text-sm">
                 <Lock className="w-3.5 h-3.5 text-slate-400" />
                 <span>{currentUser?.aadhaarMasked || 'XXXX-XXXX-4892'}</span>
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">Verified via UIDAI biometric authentication</p>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
-                e-KYC Status
+              <label className="block text-xs font-medium text-slate-500 mb-1">
+                e-KYC status
               </label>
-              <div className="flex items-center gap-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900 text-sm font-medium">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <div className="flex items-center gap-2 p-2.5 bg-white border border-slate-200 border-l-[3px] border-l-[#15803D] rounded-[6px] text-slate-900 text-sm font-semibold">
+                <CheckCircle2 className="w-4 h-4 text-[#15803D]" />
                 <span>Active & Certified</span>
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">Certified on 15-Aug-2023</p>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
-                Verified Land Parcels
+              <label className="block text-xs font-medium text-slate-500 mb-1">
+                Verified land parcels
               </label>
-              <div className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-800 text-sm font-bold flex items-center justify-between">
+              <div className="p-2.5 bg-white border border-slate-200 rounded-[6px] text-slate-800 text-sm font-bold flex items-center justify-between">
                 <span>3 Land Parcels (7.18 Ha)</span>
-                <span className="text-xs font-normal text-emerald-700">Baramati, Pune</span>
+                <span className="text-xs font-semibold text-[#166534]">Baramati, Pune</span>
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">Matched against RoR master index</p>
             </div>
           </div>
         </div>
 
-        {/* Personal & Contact Details */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        {/* Personal Details */}
+        <div className="bg-white rounded-[8px] border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center gap-2">
-            <User className="w-4 h-4 text-emerald-700" />
-            <h2 className="text-sm font-bold text-slate-900">Personal & Registered Contact Details</h2>
+            <User className="w-4 h-4 text-[#15803D]" />
+            <h2 className="text-sm font-bold text-slate-900">Personal details</h2>
           </div>
 
           <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Full Legal Name (as per Aadhaar / 7/12)
+                Full legal name (as per Aadhaar / 7/12)
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-900 font-medium"
+                className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#15803D]/20 focus:border-[#166534] text-slate-900 font-medium"
               />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Father's / Husband's Name
+                Father's / husband's name
               </label>
               <input
                 type="text"
                 value={fatherName}
                 onChange={(e) => setFatherName(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-900"
+                className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#15803D]/20 focus:border-[#166534] text-slate-900"
               />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Date of Birth
+                Date of birth
               </label>
-              <div className="relative">
-                <input
-                  type="date"
-                  value={dob}
-                  onChange={(e) => setDob(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-900"
-                />
-              </div>
+              <input
+                type="date"
+                value={dob}
+                onChange={(e) => setDob(e.target.value)}
+                className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#15803D]/20 focus:border-[#166534] text-slate-900"
+              />
             </div>
 
             <div>
@@ -187,7 +179,7 @@ export const CitizenAccountPage: React.FC = () => {
               <select
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-900 bg-white"
+                className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#15803D]/20 focus:border-[#166534] text-slate-900 bg-white"
               >
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -197,7 +189,7 @@ export const CitizenAccountPage: React.FC = () => {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Registered Mobile (for OTP & Notices)
+                Registered mobile (for OTP & notices)
               </label>
               <div className="relative">
                 <Phone className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -206,14 +198,14 @@ export const CitizenAccountPage: React.FC = () => {
                   value={mobile}
                   onChange={(e) => setMobile(e.target.value)}
                   required
-                  className="w-full pl-9 pr-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-900 font-medium"
+                  className="w-full pl-9 pr-3.5 py-2 text-sm border border-slate-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#15803D]/20 focus:border-[#166534] text-slate-900 font-medium"
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Email Address
+                Email address
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -221,55 +213,58 @@ export const CitizenAccountPage: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-9 pr-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-900"
+                  className="w-full pl-9 pr-3.5 py-2 text-sm border border-slate-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#15803D]/20 focus:border-[#166534] text-slate-900"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Official Postal & Communication Address */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-emerald-700" />
-            <h2 className="text-sm font-bold text-slate-900">Postal & Communication Address (for Revenue Notices)</h2>
+        {/* Postal Address */}
+        <div className="bg-white rounded-[8px] border border-slate-200 shadow-sm overflow-hidden">
+          <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-[#15803D]" />
+              <h2 className="text-sm font-bold text-slate-900">Postal address</h2>
+            </div>
+            <span className="text-xs text-slate-500">For statutory revenue notices</span>
           </div>
 
           <div className="p-6 space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Street Address / House / Survey Number
+                Street address / house / survey number
               </label>
               <input
                 type="text"
                 value={addressLine}
                 onChange={(e) => setAddressLine(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-900"
+                className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#15803D]/20 focus:border-[#166534] text-slate-900"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Village / City
+                  Village / city
                 </label>
                 <input
                   type="text"
                   value={village}
                   onChange={(e) => setVillage(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-900"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#15803D]/20 focus:border-[#166534] text-slate-900"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Taluka / Tehsil
+                  Taluka / tehsil
                 </label>
                 <input
                   type="text"
                   value={taluka}
                   onChange={(e) => setTaluka(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-900"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#15803D]/20 focus:border-[#166534] text-slate-900"
                 />
               </div>
 
@@ -281,19 +276,19 @@ export const CitizenAccountPage: React.FC = () => {
                   type="text"
                   value={district}
                   onChange={(e) => setDistrict(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-900"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#15803D]/20 focus:border-[#166534] text-slate-900"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  PIN Code
+                  PIN code
                 </label>
                 <input
                   type="text"
                   value={pincode}
                   onChange={(e) => setPincode(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-900"
+                  className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#15803D]/20 focus:border-[#166534] text-slate-900"
                 />
               </div>
             </div>
@@ -305,7 +300,7 @@ export const CitizenAccountPage: React.FC = () => {
           <button
             type="submit"
             disabled={isSaving}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-emerald-800 hover:bg-emerald-900 text-white text-sm font-semibold shadow-md transition-colors disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-[6px] bg-[#166534] hover:bg-[#14532D] text-white text-sm font-semibold shadow-sm transition-colors disabled:opacity-50 cursor-pointer"
           >
             <Save className="w-4 h-4" />
             {isSaving ? 'Saving Profile...' : 'Save Profile Changes'}

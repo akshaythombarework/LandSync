@@ -1,21 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import heroBg from '../assets/hero_bg.jpg';
-import { 
-  ShieldCheck, 
-  FileText, 
-  CheckCircle2, 
-  Search, 
-  MapPin, 
-  BarChart3, 
-  ArrowRight, 
-  Layers, 
-  History,
-  Lock,
-  FileCheck,
-  Mail,
-  Phone
-} from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
   // Enhanced mouse-movement parallax for desktop devices (disabled on touch)
@@ -37,10 +23,10 @@ export const LandingPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col antialiased">
+    <div className="h-screen w-full bg-[#031c15] text-white flex flex-col overflow-hidden antialiased select-none">
       {/* Hero Section - Full Viewport Immersive Experience */}
       <section 
-        className="relative overflow-hidden bg-[#031c15] text-white border-b border-emerald-950/80 min-h-screen flex items-center justify-center"
+        className="relative w-full h-full overflow-hidden bg-[#031c15] text-white flex items-center justify-center"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
@@ -142,170 +128,6 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* End-to-End Visual Workflow */}
-      <section className="py-16 bg-slate-50 border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">End-to-End Processing Pipeline</h2>
-            <p className="text-sm text-slate-600 mt-2">
-              Every document maintains an unbroken, auditable lineage from source file to GIS parcel.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 text-center">
-            {[
-              { step: '1', title: 'Upload', desc: 'PDF/JPG intake', icon: FileText },
-              { step: '2', title: 'OCR & Layout', desc: 'Multilingual text', icon: Layers },
-              { step: '3', title: 'AI Extraction', desc: '12 core fields', icon: Search },
-              { step: '4', title: 'Confidence', desc: 'Field-level score', icon: ShieldCheck },
-              { step: '5', title: 'Validation', desc: 'Rules & reference', icon: FileCheck },
-              { step: '6', title: 'Human Review', desc: 'Officer verification', icon: CheckCircle2 },
-              { step: '7', title: 'GIS & Audit', desc: 'Interactive map', icon: MapPin },
-            ].map(item => {
-              const Icon = item.icon;
-              return (
-                <div key={item.step} className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex flex-col items-center">
-                  <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold flex items-center justify-center mb-2">
-                    {item.step}
-                  </div>
-                  <Icon className="w-5 h-5 text-emerald-700 mb-1" />
-                  <h4 className="text-xs font-bold text-slate-900">{item.title}</h4>
-                  <p className="text-[10px] text-slate-500 mt-0.5">{item.desc}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Core Principles & Trust */}
-      <section className="py-16 bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-6 rounded-xl border border-slate-200 bg-slate-50">
-              <Lock className="w-6 h-6 text-emerald-700 mb-3" />
-              <h3 className="text-base font-bold text-slate-900 mb-1">Authoritative Security</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Role-based access control (RBAC) and administrative scope enforcement (State, District, Taluka, Village) with backend verification authority.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-xl border border-slate-200 bg-slate-50">
-              <History className="w-6 h-6 text-emerald-700 mb-3" />
-              <h3 className="text-base font-bold text-slate-900 mb-1">Immutable Audit Trail</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Every document upload, automated extraction, human correction, and approval generates a timestamped, traceable event log.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-xl border border-slate-200 bg-slate-50">
-              <BarChart3 className="w-6 h-6 text-amber-700 mb-3" />
-              <h3 className="text-base font-bold text-slate-900 mb-1">GIS & Live Analytics</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Approved land records visualize on an interactive map layer with district-level throughput and confidence monitoring.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Typical Official Government Website Footer */}
-      <footer className="mt-auto bg-slate-900 text-slate-300">
-        {/* Upper Footer: Ministry & Navigation Links */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-xs">
-            {/* Column 1: Ministry / Portal identity */}
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 rounded-lg bg-emerald-800 flex items-center justify-center text-emerald-300 font-bold">
-                  <ShieldCheck className="w-4 h-4" />
-                </div>
-                <span className="font-bold text-sm text-white tracking-tight">LandSync Portal</span>
-              </div>
-              <p className="text-slate-400 leading-relaxed">
-                Digital Land Record Modernization & Cadastral Validation System.
-              </p>
-              <div className="pt-2 text-slate-400 space-y-1">
-                <p className="font-semibold text-slate-200">Department of Land Resources (DoLR)</p>
-                <p>Ministry of Rural Development</p>
-                <p>Government of India</p>
-              </div>
-            </div>
-
-            {/* Column 2: Government Policies */}
-            <div>
-              <h4 className="font-bold text-white text-xs uppercase tracking-wider mb-3 pb-1 border-b border-slate-800">
-                Website Policies
-              </h4>
-              <ul className="space-y-2 text-slate-400">
-                <li><a href="#" className="hover:text-emerald-400 transition">Terms of Use & Accessibility</a></li>
-                <li><a href="#" className="hover:text-emerald-400 transition">Website Policies & Guidelines</a></li>
-                <li><a href="#" className="hover:text-emerald-400 transition">Hyperlinking Policy</a></li>
-                <li><a href="#" className="hover:text-emerald-400 transition">Privacy & Data Security Policy</a></li>
-                <li><a href="#" className="hover:text-emerald-400 transition">Copyright Policy</a></li>
-              </ul>
-            </div>
-
-            {/* Column 3: Quick Public Links */}
-            <div>
-              <h4 className="font-bold text-white text-xs uppercase tracking-wider mb-3 pb-1 border-b border-slate-800">
-                Citizen & Official Services
-              </h4>
-              <ul className="space-y-2 text-slate-400">
-                <li><Link to="/login" className="hover:text-emerald-400 transition">Portal Login (Citizen & Officer)</Link></li>
-                <li><Link to="/login" className="hover:text-emerald-400 transition">e-Ferfar & Mutation Status</Link></li>
-                <li><Link to="/login" className="hover:text-emerald-400 transition">Cadastral GIS Map Search</Link></li>
-                <li><a href="#" className="hover:text-emerald-400 transition">National Grievance Portal (CPGRAMS)</a></li>
-                <li><a href="#" className="hover:text-emerald-400 transition">Helpdesk & Standard Procedures (SOP)</a></li>
-              </ul>
-            </div>
-
-            {/* Column 4: Helpdesk & Technical Info */}
-            <div className="space-y-3">
-              <h4 className="font-bold text-white text-xs uppercase tracking-wider mb-3 pb-1 border-b border-slate-800">
-                Contact & Support
-              </h4>
-              <div className="space-y-2 text-slate-400">
-                <div className="flex items-center space-x-2">
-                  <Phone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>National Toll-Free: <strong>1800-11-8005</strong></span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Mail className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>helpdesk-landsync@gov.in</span>
-                </div>
-                <div className="pt-2 text-[11px] text-slate-400 leading-relaxed">
-                  Working Hours: 09:30 AM to 06:00 PM (Monday to Friday, except Gazetted Holidays)
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Lower Footer: Mandatory NIC / GIGW disclaimer */}
-        <div className="border-t border-slate-800/80 bg-slate-950 py-6 text-slate-400 text-[11px]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
-            <div className="space-y-1">
-              <p>
-                Content Owned, Updated and Maintained by <strong>Department of Land Resources (DoLR), Ministry of Rural Development, Government of India</strong>.
-              </p>
-              <p className="text-slate-500">
-                Designed, Developed and Hosted by <strong>National Informatics Centre (NIC)</strong>, Ministry of Electronics & Information Technology, Government of India.
-              </p>
-            </div>
-            <div className="text-slate-400 text-xs shrink-0 flex flex-col sm:flex-row items-center gap-3">
-              <span className="px-2.5 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300">
-                GIGW 3.0 Compliant
-              </span>
-              <span>Last Reviewed: <strong>05-Sep-2026</strong></span>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Tricolor bar */}
-        <div className="h-1 bg-gradient-to-r from-amber-500 via-white to-emerald-600 w-full" />
-      </footer>
     </div>
   );
 };
