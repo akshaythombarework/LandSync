@@ -118,7 +118,9 @@ export interface LandDocument {
 
 // Processing Job types
 export type ProcessingStage = 
+  | 'FILE_INTAKE'
   | 'PREPROCESSING'
+  | 'QUALITY_ASSESSMENT'
   | 'CLASSIFICATION'
   | 'LAYOUT'
   | 'OCR'
@@ -126,6 +128,11 @@ export type ProcessingStage =
   | 'NORMALIZATION'
   | 'CONFIDENCE'
   | 'VALIDATION'
+  | 'BUSINESS_RULES'
+  | 'MASTER_DATA'
+  | 'ANOMALY_CHECK'
+  | 'ROUTING'
+  | 'FINAL_VERIFICATION'
   | 'COMPLETED'
   | 'FAILED';
 
